@@ -12,6 +12,7 @@
 		A83DB0EA266BAD5400C1E91D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A83DB0E9266BAD5400C1E91D /* Assets.xcassets */; };
 		A83DB0ED266BAD5400C1E91D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A83DB0EB266BAD5400C1E91D /* Main.storyboard */; };
 		A83DB0FC266BBB4200C1E91D /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0FB266BBB4200C1E91D /* Keys.swift */; };
+		A83DB0FF266BC3D400C1E91D /* Axioms.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0FE266BC3D400C1E91D /* Axioms.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		A83DB0EE266BAD5400C1E91D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A83DB0EF266BAD5400C1E91D /* Juno.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Juno.entitlements; sourceTree = "<group>"; };
 		A83DB0FB266BBB4200C1E91D /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
+		A83DB0FE266BC3D400C1E91D /* Axioms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Axioms.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 				A83DB0E5266BAD5400C1E91D /* AppDelegate.swift */,
 				A83DB0E7266BAD5400C1E91D /* ViewController.swift */,
 				A83DB0FB266BBB4200C1E91D /* Keys.swift */,
+				A83DB0FE266BC3D400C1E91D /* Axioms.swift */,
 				A83DB0E9266BAD5400C1E91D /* Assets.xcassets */,
 				A83DB0EB266BAD5400C1E91D /* Main.storyboard */,
 				A83DB0EE266BAD5400C1E91D /* Info.plist */,
@@ -135,6 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A83DB0FF266BC3D400C1E91D /* Axioms.swift in Sources */,
 				A83DB0E8266BAD5400C1E91D /* ViewController.swift in Sources */,
 				A83DB0FC266BBB4200C1E91D /* Keys.swift in Sources */,
 				A83DB0E6266BAD5400C1E91D /* AppDelegate.swift in Sources */,
