@@ -11,6 +11,7 @@
 		A83DB0E8266BAD5400C1E91D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0E7266BAD5400C1E91D /* ViewController.swift */; };
 		A83DB0EA266BAD5400C1E91D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A83DB0E9266BAD5400C1E91D /* Assets.xcassets */; };
 		A83DB0ED266BAD5400C1E91D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A83DB0EB266BAD5400C1E91D /* Main.storyboard */; };
+		A83DB0FC266BBB4200C1E91D /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0FB266BBB4200C1E91D /* Keys.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		A83DB0EC266BAD5400C1E91D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A83DB0EE266BAD5400C1E91D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A83DB0EF266BAD5400C1E91D /* Juno.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Juno.entitlements; sourceTree = "<group>"; };
+		A83DB0FB266BBB4200C1E91D /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +57,7 @@
 			children = (
 				A83DB0E5266BAD5400C1E91D /* AppDelegate.swift */,
 				A83DB0E7266BAD5400C1E91D /* ViewController.swift */,
+				A83DB0FB266BBB4200C1E91D /* Keys.swift */,
 				A83DB0E9266BAD5400C1E91D /* Assets.xcassets */,
 				A83DB0EB266BAD5400C1E91D /* Main.storyboard */,
 				A83DB0EE266BAD5400C1E91D /* Info.plist */,
@@ -133,6 +136,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A83DB0E8266BAD5400C1E91D /* ViewController.swift in Sources */,
+				A83DB0FC266BBB4200C1E91D /* Keys.swift in Sources */,
 				A83DB0E6266BAD5400C1E91D /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -275,12 +279,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9Q6UB3UBW7;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = Juno/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = "1.0.0-beta";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Fetch.Juno;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -296,12 +301,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9Q6UB3UBW7;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = Juno/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = "1.0.0-beta";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Fetch.Juno;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
