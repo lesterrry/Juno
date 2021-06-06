@@ -8,8 +8,20 @@
 import Cocoa
 
 class ViewController: NSViewController {
+    
+    //*********************************************************************
+    //OUTLETS
+    //*********************************************************************
     @IBOutlet weak var dummyImageView: NSImageView!
     
+    //*********************************************************************
+    //CONSTS
+    //*********************************************************************
+    let defaults = UserDefaults.standard
+    
+    //*********************************************************************
+    //SYSTEM
+    //*********************************************************************
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -17,14 +29,40 @@ class ViewController: NSViewController {
 
     override var representedObject: Any? {
         didSet {
-        // Update the view, if already loaded.
+            // Update the view, if already loaded.
         }
     }
     
     override func viewDidAppear() {
-        getVolumes()
+        //Fetching data and performing all operations in async mode
+        DispatchQueue.main.async {
+            if let instance = self.fetchInfo() {
+                if JunoAxioms.appVersion != nil && !JunoAxioms.appVersion!.contains("beta") && instance.version != JunoAxioms.appVersion {
+                    if self.displayAlert(
+                        title: "New version is out",
+                        message: "Your current version is \(JunoAxioms.appVersion!), however, \(instance.version) is the latest one.",
+                        buttons: "Update", "Skip"
+                    ) == 1000 {
+                        NSWorkspace.shared.open(URL(string: "https://github.com/Lesterrry/Juno/releases/latest")!)
+                    }
+                }
+                if let m = instance.message, self.defaults.string(forKey: "last_message") != m {
+                    self.displayAlert(title: "Message from the developer", message: m, buttons: "OK")
+                    self.defaults.setValue(m, forKey: "last_message")
+                } else {
+                    self.defaults.setValue("nil", forKey: "last_message")
+                }
+                if let sm = instance.shortMessage {
+                    let appDelegate = NSApplication.shared.delegate as! AppDelegate
+                    appDelegate.initShortMessageMenuItem(title: sm, link: instance.shortMessageLink)
+                }
+            }
+        }
     }
 
+    //*********************************************************************
+    //FUNCTIONS
+    //*********************************************************************
     func getVolumes() -> URL? {
         let filemanager = FileManager()
         let keys = [URLResourceKey.nameKey, URLResourceKey.volumeIsRemovableKey, URLResourceKey.nameKey, URLResourceKey.volumeAvailableCapacityKey] as Set<URLResourceKey>
@@ -51,21 +89,21 @@ class ViewController: NSViewController {
         dummyImageView.layer?.add(rotateAnimation, forKey: nil)
     }
     
-    func fetchInfo() {
+    func fetchInfo() -> JunoAxioms.InfoResponse? {
+        var instance: JunoAxioms.InfoResponse? = nil
+        let semaphore = DispatchSemaphore(value: 0)
         let session = URLSession.shared
         let url = URL(string: JunoKeys.infoEndpoint + JunoKeys.infoKey)!
         let task = session.dataTask(with: url, completionHandler: { data, response, error in
-            // Check the response
-            if error != nil {
-                return
-            }
+            if error != nil { return }
             do {
-                let json = try JSONDecoder().decode(JunoAxioms.InfoResponse.self, from: data! )
-                //try JSONSerialization.jsonObject(with: data!, options: [])
-                print(json.version)
+                instance = try JSONDecoder().decode(JunoAxioms.InfoResponse.self, from: data! )
+                semaphore.signal()
             } catch {}
         })
         task.resume()
+        semaphore.wait()
+        return instance
     }
     
     @discardableResult
@@ -76,6 +114,17 @@ class ViewController: NSViewController {
         task.launch()
         task.waitUntilExit()
         return task.terminationStatus
+    }
+    
+    @discardableResult
+    func displayAlert(title: String, message: String, buttons: String...) -> Int {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        for button in buttons{
+            alert.addButton(withTitle: button)
+        }
+        return alert.runModal().rawValue
     }
 }
 

@@ -14,8 +14,15 @@
                         <items>
                             <menuItem title="Juno" id="1Xt-HY-uBw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Juno" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="Juno" systemMenu="apple" autoenablesItems="NO" id="uQy-DD-JDr">
                                     <items>
+                                        <menuItem title="Ruff" hidden="YES" enabled="NO" id="Ekj-EN-DQh">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="shortMessageMenuItemPressed:" target="Voe-Tx-rLC" id="IlI-f1-jzA"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="Z5j-T0-Aov"/>
                                         <menuItem title="About Juno" id="eGL-Vx-PW0">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
@@ -24,16 +31,11 @@
                                         </menuItem>
                                         <menuItem title="Created by @lesterrry" enabled="NO" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
-                                            </connections>
                                         </menuItem>
                                         <menuItem title="in Moscow, 2021" enabled="NO" id="MET-7u-X0m">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="5yF-hZ-UOP"/>
-                                            </connections>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="79g-Oh-3ec"/>
                                         <menuItem title="Hide Juno" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
@@ -51,6 +53,13 @@
                                                 <action selector="unhideAllApplications:" target="Ady-hI-5gd" id="Dhg-Le-xox"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="cnj-Qq-7kI"/>
+                                        <menuItem title="See Also: Radio Automne" id="Z6N-4T-yzW">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="automneMenuItemPressed:" target="Voe-Tx-rLC" id="cZu-qf-gM5"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
                                         <menuItem title="Quit Juno" keyEquivalent="q" id="4sb-4s-VLi">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -61,14 +70,20 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Help" id="wpr-3q-Mcd">
+                            <menuItem title="Hеlp" id="d6q-aR-XlQ">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Help" systemMenu="help" autoenablesItems="NO" id="F2S-fz-NVQ">
+                                <menu key="submenu" title="Hеlp" autoenablesItems="NO" id="p5b-fT-ddt">
                                     <items>
+                                        <menuItem title="Contact Developer" id="mXh-kX-d82">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="contactMenuItemPressed:" target="Voe-Tx-rLC" id="9en-p2-HtX"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Visit Github" id="FKE-Sm-Kum">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
+                                                <action selector="githubMenuItemPressed:" target="Voe-Tx-rLC" id="vPr-59-H19"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -80,7 +95,11 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Juno" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Juno" customModuleProvider="target">
+                    <connections>
+                        <outlet property="shortMessageMenuItem" destination="Ekj-EN-DQh" id="rSV-kf-fAB"/>
+                    </connections>
+                </customObject>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
