@@ -140,7 +140,7 @@
                                 <autoresizingMask key="autoresizingMask"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Back" id="ckU-nJ-CFb"/>
                             </imageView>
-                            <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tf5-wi-ney" userLabel="Dummy">
+                            <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tf5-wi-ney" userLabel="Disk">
                                 <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Dummy" id="cro-1l-0S4"/>
@@ -150,10 +150,30 @@
                                 <autoresizingMask key="autoresizingMask"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Main" id="EUg-Kh-Mje"/>
                             </imageView>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DuD-UQ-xwi" userLabel="Main Label">
+                                <rect key="frame" x="27" y="395" width="233" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" allowsUndo="NO" id="s8T-wB-p3h">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PFm-VT-XsN" userLabel="Additional Label">
+                                <rect key="frame" x="27" y="349" width="233" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" allowsUndo="NO" id="9OD-7y-G4g">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                     </view>
                     <connections>
-                        <outlet property="dummyImageView" destination="Tf5-wi-ney" id="cas-h8-Jiw"/>
+                        <outlet property="additionalLabel" destination="PFm-VT-XsN" id="i81-fp-3tg"/>
+                        <outlet property="diskImageView" destination="Tf5-wi-ney" id="aPa-FA-PTD"/>
+                        <outlet property="mainLabel" destination="DuD-UQ-xwi" id="Xom-j7-W9C"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -163,7 +183,7 @@
     </scenes>
     <resources>
         <image name="Back" width="1080" height="1080"/>
-        <image name="Dummy" width="1000" height="1000"/>
+        <image name="Dummy" width="1795" height="1795"/>
         <image name="Main" width="1080" height="1080"/>
     </resources>
 </document>

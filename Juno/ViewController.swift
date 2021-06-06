@@ -12,7 +12,9 @@ class ViewController: NSViewController {
     //*********************************************************************
     //OUTLETS
     //*********************************************************************
-    @IBOutlet weak var dummyImageView: NSImageView!
+    @IBOutlet weak var diskImageView: NSImageView!
+    @IBOutlet weak var mainLabel: NSTextField!
+    @IBOutlet weak var additionalLabel: NSTextField!
     
     //*********************************************************************
     //CONSTS
@@ -24,12 +26,14 @@ class ViewController: NSViewController {
     //*********************************************************************
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        //Setting the font programatically
+        mainLabel.font = NSFont(name: "Opirus-OPIK", size: 27)
+        additionalLabel.font = NSFont(name: "Opirus-OPIK", size: 27)
     }
 
     override var representedObject: Any? {
         didSet {
-            // Update the view, if already loaded.
+
         }
     }
     
@@ -58,11 +62,22 @@ class ViewController: NSViewController {
                 }
             }
         }
+        //Do what every player would do
+        loadDisk()
     }
 
     //*********************************************************************
     //FUNCTIONS
     //*********************************************************************
+    func loadDisk() {
+        mainLabel.stringValue = "Reading..."
+        if let vs = getVolumes() {
+            mainLabel.stringValue = vs.lastPathComponent
+        } else {
+            mainLabel.stringValue = "No disc"
+        }
+    }
+    
     func getVolumes() -> URL? {
         let filemanager = FileManager()
         let keys = [URLResourceKey.nameKey, URLResourceKey.volumeIsRemovableKey, URLResourceKey.nameKey, URLResourceKey.volumeAvailableCapacityKey] as Set<URLResourceKey>
@@ -83,10 +98,13 @@ class ViewController: NSViewController {
         rotateAnimation.byValue = Double.pi * -2.0
         rotateAnimation.duration = 1
         rotateAnimation.repeatCount = .infinity
-        dummyImageView.layer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        dummyImageView.layer?.position = CGPoint(x: dummyImageView.frame.origin.x + dummyImageView.frame.width / 2,
-                                             y: dummyImageView.frame.origin.y + dummyImageView.frame.height / 2)
-        dummyImageView.layer?.add(rotateAnimation, forKey: nil)
+        diskImageView.layer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        diskImageView.layer?.position = CGPoint(x: diskImageView.frame.origin.x + diskImageView.frame.width / 2,
+                                             y: diskImageView.frame.origin.y + diskImageView.frame.height / 2)
+        diskImageView.layer?.add(rotateAnimation, forKey: nil)
+        diskImageView.layer?.borderWidth = 1
+        diskImageView.layer?.masksToBounds = true
+        diskImageView.layer?.cornerRadius = diskImageView.frame.height / 2 //This will change with corners of image and height/2 will make this circle shape
     }
     
     func fetchInfo() -> JunoAxioms.InfoResponse? {
