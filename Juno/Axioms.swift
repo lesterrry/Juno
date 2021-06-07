@@ -6,9 +6,22 @@
 //
 
 import Foundation
+import Cocoa
 
 class JunoAxioms {
     public static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    
+    struct Disk {
+        enum Tracks: Equatable {
+            case progressive([[URL]])
+            case traditional([URL])
+        }
+        
+        let title: String
+        let length: Int32
+        let coverImage: NSImage?
+        let tracks: Tracks
+    }
     
     class InfoResponse: Codable {
         let shortMessage: String?

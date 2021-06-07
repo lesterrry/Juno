@@ -20,6 +20,7 @@ class ViewController: NSViewController {
     //CONSTS
     //*********************************************************************
     let defaults = UserDefaults.standard
+    let fm = FileManager.default
     
     //*********************************************************************
     //SYSTEM
@@ -69,23 +70,44 @@ class ViewController: NSViewController {
     //*********************************************************************
     //FUNCTIONS
     //*********************************************************************
-    func loadDisk() {
+    @discardableResult
+    func loadDisk() -> JunoAxioms.Disk? {
         mainLabel.stringValue = "Reading..."
-        if let vs = getVolumes() {
-            mainLabel.stringValue = vs.lastPathComponent
+        if let vs = getVolume() {
+            let diskTitle: String
+            diskTitle = vs.lastPathComponent
+            let paths: [String]
+            do {
+                paths = try fm.contentsOfDirectory(atPath: "/Users/ajdarnasibullin/Кэш/disk2")//vs.path)
+            } catch {
+                mainLabel.stringValue = "Disc error"
+                return nil
+            }
+            for p in paths {
+                do {
+                    let k = [URLResourceKey.isDirectoryKey] as Set<URLResourceKey>
+                    var b = URL(fileURLWithPath: "/Users/ajdarnasibullin/Кэш/disk2")
+                    b.appendPathComponent(p, isDirectory: false)
+                    let a = try b.resourceValues(forKeys: k)
+                    print("\(b) \(a.isDirectory)")
+                } catch {
+                    mainLabel.stringValue = "Disc error"
+                    return nil
+                }
+            }
         } else {
             mainLabel.stringValue = "No disc"
+            return nil
         }
+        return nil
     }
     
-    func getVolumes() -> URL? {
-        let filemanager = FileManager()
+    func getVolume() -> URL? {
         let keys = [URLResourceKey.nameKey, URLResourceKey.volumeIsRemovableKey, URLResourceKey.nameKey, URLResourceKey.volumeAvailableCapacityKey] as Set<URLResourceKey>
-        let paths = filemanager.mountedVolumeURLs(includingResourceValuesForKeys: .none, options: .skipHiddenVolumes)
+        let paths = fm.mountedVolumeURLs(includingResourceValuesForKeys: .none, options: .skipHiddenVolumes)
         if paths == nil { return nil }
         for path in paths!{
             if try! path.resourceValues(forKeys: keys).volumeAvailableCapacity == 0 {
-                print(path.absoluteURL)
                 return path.absoluteURL
             }
         }
