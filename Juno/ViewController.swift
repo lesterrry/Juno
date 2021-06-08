@@ -6,6 +6,7 @@
 //
 
 import Cocoa
+import AVFoundation
 
 class ViewController: NSViewController {
     
@@ -74,32 +75,51 @@ class ViewController: NSViewController {
     func loadDisk() -> JunoAxioms.Disk? {
         mainLabel.stringValue = "Reading..."
         if let vs = getVolume() {
-            let diskTitle: String
-            diskTitle = vs.lastPathComponent
-            let paths: [String]
-            do {
-                paths = try fm.contentsOfDirectory(atPath: "/Users/ajdarnasibullin/Кэш/disk2")//vs.path)
-            } catch {
-                mainLabel.stringValue = "Disc error"
-                return nil
-            }
-            for p in paths {
-                do {
-                    let k = [URLResourceKey.isDirectoryKey] as Set<URLResourceKey>
-                    var b = URL(fileURLWithPath: "/Users/ajdarnasibullin/Кэш/disk2")
-                    b.appendPathComponent(p, isDirectory: false)
-                    let a = try b.resourceValues(forKeys: k)
-                    print("\(b) \(a.isDirectory)")
-                } catch {
-                    mainLabel.stringValue = "Disc error"
-                    return nil
-                }
-            }
+            let diskTitle = vs.lastPathComponent
+            let diskParameters = walkThroughPath(path: "/Users/ajdarnasibullin/Кэш/disk2")//vs.path)
+            print(diskParameters)
+            //let diskLength =
+            
         } else {
             mainLabel.stringValue = "No disc"
             return nil
         }
         return nil
+    }
+    
+    func walkThroughPath(path: String, recursive: Bool = true) -> (JunoAxioms.Disk.Tracks?, Double?) {
+        let paths: [String]
+        do {
+            paths = try fm.contentsOfDirectory(atPath: path)
+        } catch {
+            mainLabel.stringValue = "Disc error"
+            return (nil, nil)
+        }
+
+        var tracks = JunoAxioms.Disk.Tracks.traditional([])
+        var length: Double = 0.0
+        for p in paths {
+            do {
+                let k = [URLResourceKey.isDirectoryKey, URLResourceKey.isHiddenKey] as Set<URLResourceKey>
+                var b = URL(fileURLWithPath: path)
+                b.appendPathComponent(p, isDirectory: false)
+                let a = try b.resourceValues(forKeys: k)
+                if (a.isDirectory ?? false) && recursive {
+                    if case .traditional = tracks { tracks = .progressive([])}
+                    let folderData = walkThroughPath(path: b.path, recursive: false)
+                    tracks.append(newElement: folderData.0!)
+                    length += folderData.1!
+                } else if !(a.isHidden ?? true) {
+                    tracks.append(newElement: b.absoluteURL)
+                    let asset = AVURLAsset(url: b, options: nil)
+                    length += asset.duration.seconds
+                }
+            } catch {
+                mainLabel.stringValue = "Disc error"
+                return (nil, nil)
+            }
+        }
+        return (tracks, length)
     }
     
     func getVolume() -> URL? {
