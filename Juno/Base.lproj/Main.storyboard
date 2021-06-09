@@ -143,7 +143,7 @@
                             <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tf5-wi-ney" userLabel="Disk">
                                 <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Dummy" id="cro-1l-0S4"/>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="Dummy" id="cro-1l-0S4"/>
                             </imageView>
                             <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JiP-da-I7E" userLabel="Main">
                                 <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>

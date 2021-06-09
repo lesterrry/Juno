@@ -78,7 +78,7 @@ class ViewController: NSViewController {
         mainLabel.stringValue = "Reading..."
         DispatchQueue.main.async {
             let disk = self.loadDisk()
-            //print(disk)
+            print(disk)
             self.diskImageView.image = disk?.coverImage
         }
     }
@@ -118,6 +118,9 @@ class ViewController: NSViewController {
                     let jsonData = try? JSONEncoder().encode(diskToSave)
                     self.fm.createFile(atPath: self.dataPath!.appendingPathComponent("\(f).json").path, contents: jsonData, attributes: nil)
                 }
+            }
+            if diskImage == nil {
+                diskImage = getCoverFromID3(from: diskParameters.0)
             }
             return JunoAxioms.Disk(title: diskTitle, length: diskLength, coverImage: diskImage, fingerprint: fingerprint, tracks: diskParameters.0)
         } else {
