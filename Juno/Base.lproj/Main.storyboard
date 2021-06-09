@@ -148,7 +148,7 @@
                             <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JiP-da-I7E" userLabel="Main">
                                 <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Main" id="EUg-Kh-Mje"/>
+                                <imageCell key="cell" enabled="NO" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Main" id="EUg-Kh-Mje"/>
                             </imageView>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DuD-UQ-xwi" userLabel="Main Label">
                                 <rect key="frame" x="27" y="395" width="233" height="32"/>

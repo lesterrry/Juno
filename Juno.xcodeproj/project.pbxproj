@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,6 +15,7 @@
 		A83DB0FF266BC3D400C1E91D /* Axioms.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0FE266BC3D400C1E91D /* Axioms.swift */; };
 		A89BB7F4266CFC5500781C3A /* Font.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = A89BB7F3266CFB4700781C3A /* Font.ttf */; };
 		A89BB7F8266D02CC00781C3A /* Font2.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = A89BB7F6266D029600781C3A /* Font2.ttf */; };
+		A89BB7FC266FEF9800781C3A /* ID3TagEditor in Frameworks */ = {isa = PBXBuildFile; productRef = A89BB7FB266FEF9800781C3A /* ID3TagEditor */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A89BB7FC266FEF9800781C3A /* ID3TagEditor in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,6 +116,9 @@
 			dependencies = (
 			);
 			name = Juno;
+			packageProductDependencies = (
+				A89BB7FB266FEF9800781C3A /* ID3TagEditor */,
+			);
 			productName = Juno;
 			productReference = A83DB0E2266BAD5300C1E91D /* Juno.app */;
 			productType = "com.apple.product-type.application";
@@ -141,6 +146,9 @@
 				Base,
 			);
 			mainGroup = A83DB0D9266BAD5300C1E91D;
+			packageReferences = (
+				A89BB7FA266FEF9700781C3A /* XCRemoteSwiftPackageReference "ID3TagEditor" */,
+			);
 			productRefGroup = A83DB0E3266BAD5300C1E91D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -369,6 +377,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A89BB7FA266FEF9700781C3A /* XCRemoteSwiftPackageReference "ID3TagEditor" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/chicio/ID3TagEditor";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.1.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A89BB7FB266FEF9800781C3A /* ID3TagEditor */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A89BB7FA266FEF9700781C3A /* XCRemoteSwiftPackageReference "ID3TagEditor" */;
+			productName = ID3TagEditor;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A83DB0DA266BAD5300C1E91D /* Project object */;
 }

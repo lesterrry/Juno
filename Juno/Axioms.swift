@@ -12,42 +12,64 @@ class JunoAxioms {
     public static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     
     struct Disk {
-        enum Tracks: Equatable {
-            case progressive([[URL]])
-            case traditional([URL])
+        let title: String
+        let length: String?
+        let coverImage: NSImage?
+        let fingerprint: String?
+        let tracks: Tracks
+        
+        struct Track: Codable {
+            let url: URL?
+            var title: String?
+            var artist: String?
+            var album: String?
             
-            func array<T>() -> T? {
-                if T.self == [URL].self {
-                    if case .traditional(let p) = self {
-                        return (p as! T)
-                    } else {
-                        return nil
-                    }
-                } else if T.self == [[URL]].self {
-                    if case .progressive(let p) = self {
-                        return (p as! T)
-                    } else {
-                        return nil
-                    }
-                }
-                return nil
+            enum CodingKeys: String, CodingKey {
+                case url, title, artist, album
             }
-            mutating func append(newElement: [URL]) {
+            init(url: URL?, title: String?, artist: String?, album: String?) {
+                self.url = url
+                self.title = title
+                self.artist = artist
+                self.album = album
+            }
+        }
+        enum Tracks {
+            case progressive([[Track]])
+            case traditional([Track])
+            
+            var progressive: [[Track]]? {
                 switch self {
-                case .progressive(var p):
-                    p.append(newElement)
-                    self = .progressive(p)
+                case .progressive(let p):
+                    return p
                 case .traditional:
-                    fatalError("Attempt to append progressive track item to a traditional collection")
+                    return nil
                 }
             }
-            mutating func append(newElement: URL) {
+            var traditional: [Track]? {
                 switch self {
                 case .progressive:
-                    fatalError("Attempt to append traditional track item to a progressive collection")
-                case .traditional(var t):
-                    t.append(newElement)
-                    self = .traditional(t)
+                    return nil
+                case .traditional(let t):
+                    return t
+                }
+            }
+            
+            static func complement(what: [Track], with: [Track]) -> [Track] {
+                var complemented: [Track] = what
+                for i in what.indices {
+                    if what[i].title == nil && with[i].title != nil { complemented[i].title = with[i].title }
+                    if what[i].album == nil && with[i].album != nil { complemented[i].album = with[i].album }
+                    if what[i].artist == nil && with[i].artist != nil { complemented[i].artist = with[i].artist }
+                }
+                return complemented
+            }
+            func count() -> Int {
+                switch self {
+                case .traditional(let t):
+                    return t.count
+                case .progressive(let p):
+                    return p.count
                 }
             }
             mutating func append(newElement: Tracks) {
@@ -70,12 +92,44 @@ class JunoAxioms {
                     }
                 }
             }
+            mutating func append(newElement: Track) {
+                switch self {
+                case .progressive(var p):
+                    p[p.count - 1].append(newElement)
+                case .traditional(var t):
+                    t.append(newElement)
+                    self = .traditional(t)
+                }
+            }
         }
         
-        let title: String
-        let length: Int32
-        let coverImage: NSImage?
-        let tracks: Tracks
+        struct Saved: Codable {
+            let reliable: Bool
+            let title: String
+            let coverImageName: String
+            let tracks: [Track]?
+            enum CodingKeys: String, CodingKey {
+                case reliable, title, tracks
+                case coverImageName = "cover_image_name"
+            }
+            init(reliable: Bool, title: String, coverImageName: String, tracks: [Track]?) {
+                self.reliable = reliable
+                self.title = title
+                self.coverImageName = coverImageName
+                self.tracks = tracks
+            }
+            
+            static func fill(_ with: [Track]?) -> [Track]? {
+                if with == nil { return nil }
+                var t = with
+                for i in t!.indices {
+                    if t![i].album == nil { t![i].album = "" }
+                    if t![i].artist == nil { t![i].artist = "" }
+                    if t![i].title == nil { t![i].title = "" }
+                }
+                return t
+            }
+        }
     }
     
     class InfoResponse: Codable {
@@ -90,7 +144,7 @@ class JunoAxioms {
             case message, version
         }
         
-        init(shortMessage: String, shortMessageLink: String, message: String, version: String){
+        init(shortMessage: String, shortMessageLink: String, message: String, version: String) {
             self.shortMessage = shortMessage
             self.shortMessageLink = shortMessageLink
             self.message = message
