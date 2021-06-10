@@ -11,6 +11,10 @@ import Cocoa
 class JunoAxioms {
     public static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     
+    enum State {
+        case standby, busy, error, ready, playing, paused
+    }
+    
     struct Disk {
         let title: String
         let length: String?

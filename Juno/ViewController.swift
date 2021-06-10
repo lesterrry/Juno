@@ -17,24 +17,38 @@ class ViewController: NSViewController {
     @IBOutlet weak var diskImageView: NSImageView!
     @IBOutlet weak var mainLabel: NSTextField!
     @IBOutlet weak var additionalLabel: NSTextField!
+    @IBOutlet weak var numberLabel: NSTextField!
+    @IBOutlet weak var knownLightImageView: NSImageView!
+    @IBOutlet weak var folderIcoLightImageView: NSImageView!
+    @IBOutlet weak var trackIcoLightImageView: NSImageView!
+    @IBOutlet weak var diskLoadOneImageView: NSImageView!
+    @IBOutlet weak var diskLoadTwoImageView: NSImageView!
+    @IBOutlet weak var diskLoadThreeImageView: NSImageView!
     
     //*********************************************************************
-    // CONSTS
+    // CONSTS & VARS
     //*********************************************************************
     let defaults = UserDefaults.standard
     let fm = FileManager.default
     let tagEditor = ID3TagEditor()
     let knownMusicExtensions = ["mp3", "aiff", "flac", "wav", "cdda", "au", "aac", "wma", "ac3", "ape"]
+    
+    var diskLoadLightPosition = 0
+    var mainTimer: Timer!
     var dataPath: URL? = nil
+    var systemCurrentState = JunoAxioms.State.standby
+    var systemTargetState: JunoAxioms.State? = nil
+    var mainDisk: JunoAxioms.Disk? = nil
     
     //*********************************************************************
-    // SYSTEM
+    // MAIN SYSTEM
     //*********************************************************************
     override func viewDidLoad() {
         super.viewDidLoad()
         //Setting the font programatically
-        mainLabel.font = NSFont(name: "Opirus-OPIK", size: 27)
-        additionalLabel.font = NSFont(name: "Opirus-OPIK", size: 27)
+        mainLabel.font = NSFont(name: "MinecartLCD", size: 23)
+        additionalLabel.font = NSFont(name: "MinecartLCD", size: 23)
+        numberLabel.font = NSFont(name: "DS-Digital", size: 32)
         
         dataPath = fm.homeDirectoryForCurrentUser.appendingPathComponent("Juno/Disks")
         if !fm.fileExists(atPath: dataPath!.path) {
@@ -49,7 +63,7 @@ class ViewController: NSViewController {
     }
     
     override func viewDidAppear() {
-        //Fetching data and performing all operations in async mode
+        //Fetch data and performing all operations in async mode
 //        DispatchQueue.main.async {
 //            if let instance = self.fetchInfo() {
 //                if JunoAxioms.appVersion != nil && !JunoAxioms.appVersion!.contains("beta") && instance.version != JunoAxioms.appVersion {
@@ -74,12 +88,14 @@ class ViewController: NSViewController {
 //            }
 //        }
         //Do what every player would do
-        
-        mainLabel.stringValue = "Reading..."
-        DispatchQueue.main.async {
-            let disk = self.loadDisk()
-            print(disk)
-            self.diskImageView.image = disk?.coverImage
+        setSystemCurrentState(.busy)
+        mainLabel.stringValue = "READING..."
+        DispatchQueue.global(qos: .background).async {
+            guard let disk = self.loadDisk() else {
+                self.systemTargetState = .error
+                return
+            }
+            self.mainDisk = disk
         }
     }
 
@@ -124,7 +140,6 @@ class ViewController: NSViewController {
             }
             return JunoAxioms.Disk(title: diskTitle, length: diskLength, coverImage: diskImage, fingerprint: fingerprint, tracks: diskParameters.0)
         } else {
-            mainLabel.stringValue = "No disc"
             return nil
         }
     }
@@ -159,13 +174,55 @@ class ViewController: NSViewController {
                     length += asset.duration.seconds
                 }
             } catch {
-                mainLabel.stringValue = "Disc error"
+                mainLabel.stringValue = "DISC ERROR"
                 return nil
             }
         }
         return (tracks, length)
     }
     
+    func setSystemCurrentState(_ to: JunoAxioms.State, description: String? = nil) {
+        systemCurrentState = to
+        switch to {
+        case .busy, .playing:
+            mainTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.mainTick), userInfo: nil, repeats: true)
+        case .error:
+            mainTimer.invalidate()
+            if description != nil { mainLabel.stringValue = description! }
+            lightsOut()
+        case .ready:
+            mainTimer.invalidate()
+            diskLoadOneImageView.isHidden = false
+            diskLoadTwoImageView.isHidden = false
+            diskLoadThreeImageView.isHidden = false
+        default:
+            mainTimer.invalidate()
+        }
+    }
+    
+    func lightsOut() {
+        trackIcoLightImageView.isHidden = true
+        folderIcoLightImageView.isHidden = true
+        knownLightImageView.isHidden = true
+        diskLoadOneImageView.isHidden = true
+        diskLoadTwoImageView.isHidden = true
+        diskLoadThreeImageView.isHidden = true
+    }
+    
+    func displayToComply(with: JunoAxioms.Disk) {
+        switch with.tracks {
+        case .progressive(let p):
+            folderIcoLightImageView.isHidden = false
+            trackIcoLightImageView.isHidden = true
+            numberLabel.stringValue = String(p.count)
+        case .traditional(let t):
+            folderIcoLightImageView.isHidden = true
+            trackIcoLightImageView.isHidden = false
+            numberLabel.stringValue = String(t.count)
+        }
+        additionalLabel.stringValue = with.length ?? ""
+        mainLabel.stringValue = with.title
+    }
     
     func getFingerprint(from: (Int?, Double?)) -> String? {
         if let a = from.0, let b = from.1 {
@@ -262,6 +319,41 @@ class ViewController: NSViewController {
             alert.addButton(withTitle: button)
         }
         return alert.runModal().rawValue
+    }
+    
+    @objc
+    func mainTick() {
+        switch systemCurrentState {
+        case .busy:
+            if mainDisk != nil {
+                self.displayToComply(with: mainDisk!)
+                self.diskImageView.image = mainDisk!.coverImage
+                self.setSystemCurrentState(.ready)
+                return
+            }
+            if systemTargetState != nil {
+                setSystemCurrentState(systemTargetState!)
+                systemTargetState = nil
+            }
+            diskLoadLightPosition += 1
+            switch diskLoadLightPosition {
+            case 1:
+                diskLoadOneImageView.isHidden = false
+                diskLoadTwoImageView.isHidden = true
+                diskLoadThreeImageView.isHidden = true
+            case 2:
+                diskLoadOneImageView.isHidden = true
+                diskLoadTwoImageView.isHidden = false
+                diskLoadThreeImageView.isHidden = true
+            case 3:
+                diskLoadOneImageView.isHidden = true
+                diskLoadTwoImageView.isHidden = true
+                diskLoadThreeImageView.isHidden = false
+                diskLoadLightPosition = 0
+            default: ()
+            }
+        default: ()
+        }
     }
 }
 

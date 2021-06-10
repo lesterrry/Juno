@@ -136,19 +136,19 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="g1b-N1-Ouv" userLabel="Back">
-                                <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                <rect key="frame" x="0.0" y="2" width="480" height="480"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Back" id="ckU-nJ-CFb"/>
                             </imageView>
                             <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tf5-wi-ney" userLabel="Disk">
-                                <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                <rect key="frame" x="0.0" y="100" width="480" height="480"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" image="Dummy" id="cro-1l-0S4"/>
                             </imageView>
                             <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JiP-da-I7E" userLabel="Main">
                                 <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <imageCell key="cell" enabled="NO" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Main" id="EUg-Kh-Mje"/>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Main" id="EUg-Kh-Mje"/>
                             </imageView>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DuD-UQ-xwi" userLabel="Main Label">
                                 <rect key="frame" x="27" y="395" width="233" height="32"/>
@@ -160,20 +160,72 @@
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PFm-VT-XsN" userLabel="Additional Label">
-                                <rect key="frame" x="27" y="349" width="233" height="32"/>
+                                <rect key="frame" x="112" y="357" width="148" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" allowsUndo="NO" id="9OD-7y-G4g">
+                                <textFieldCell key="cell" lineBreakMode="clipping" allowsUndo="NO" alignment="right" id="9OD-7y-G4g">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3bg-oI-85L" userLabel="Number Label">
+                                <rect key="frame" x="47" y="354" width="67" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" allowsUndo="NO" id="Yg9-rE-AcY">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hex-3o-izT" userLabel="Lights">
+                                <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <subviews>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="P7H-CQ-xqr" userLabel="Known">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Known" id="yCk-eR-yEP"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jfr-bO-U7q" userLabel="FolderIco">
+                                        <rect key="frame" x="0.0" y="9" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="FolderIco" id="NQM-K1-wyh"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LLl-Sc-0eH" userLabel="TrackIco">
+                                        <rect key="frame" x="0.0" y="9" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="TrackIco" id="C2g-5t-eww"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KJQ-nj-TCY" userLabel="DiskLoad1">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="DiskLoad1" id="mL1-ZT-CNX"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oLo-F4-ijH" userLabel="DiskLoad2">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="DiskLoad2" id="L0R-YS-aM0"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pGt-Tf-hzp" userLabel="DiskLoad3">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="DiskLoad3" id="L6q-Ri-EDT"/>
+                                    </imageView>
+                                </subviews>
+                            </customView>
                         </subviews>
                     </view>
                     <connections>
                         <outlet property="additionalLabel" destination="PFm-VT-XsN" id="i81-fp-3tg"/>
                         <outlet property="diskImageView" destination="Tf5-wi-ney" id="aPa-FA-PTD"/>
+                        <outlet property="diskLoadOneImageView" destination="KJQ-nj-TCY" id="eNf-Jp-qGx"/>
+                        <outlet property="diskLoadThreeImageView" destination="pGt-Tf-hzp" id="asf-UR-RN5"/>
+                        <outlet property="diskLoadTwoImageView" destination="oLo-F4-ijH" id="kDa-wl-Zcn"/>
+                        <outlet property="folderIcoLightImageView" destination="jfr-bO-U7q" id="Kd3-8h-Q98"/>
+                        <outlet property="knownLightImageView" destination="P7H-CQ-xqr" id="ysj-DO-IYi"/>
                         <outlet property="mainLabel" destination="DuD-UQ-xwi" id="Xom-j7-W9C"/>
+                        <outlet property="numberLabel" destination="3bg-oI-85L" id="cJ3-gF-7jA"/>
+                        <outlet property="trackIcoLightImageView" destination="LLl-Sc-0eH" id="7fM-BW-KkV"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -183,7 +235,13 @@
     </scenes>
     <resources>
         <image name="Back" width="1080" height="1080"/>
+        <image name="DiskLoad1" width="1080" height="1080"/>
+        <image name="DiskLoad2" width="1080" height="1080"/>
+        <image name="DiskLoad3" width="1080" height="1080"/>
         <image name="Dummy" width="1795" height="1795"/>
+        <image name="FolderIco" width="1080" height="1080"/>
+        <image name="Known" width="1080" height="1080"/>
         <image name="Main" width="1080" height="1080"/>
+        <image name="TrackIco" width="1080" height="1080"/>
     </resources>
 </document>
