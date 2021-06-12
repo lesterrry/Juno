@@ -11,12 +11,20 @@ import Cocoa
 class JunoAxioms {
     public static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     
-    enum State {
-        case standby, busy, error, ready, playing, paused
+    enum SystemState: Equatable {
+        case standby, busy, ready, playing, paused
+        case error(String?)
+    }
+    
+    enum DiskAnimationState {
+        case removed
+        case stopped
+        case spinning
     }
     
     struct Disk {
         let title: String
+        let known: Bool
         let length: String?
         let coverImage: NSImage?
         let fingerprint: String?
@@ -27,15 +35,17 @@ class JunoAxioms {
             var title: String?
             var artist: String?
             var album: String?
+            let length: Double?
             
             enum CodingKeys: String, CodingKey {
-                case url, title, artist, album
+                case url, title, artist, album, length
             }
-            init(url: URL?, title: String?, artist: String?, album: String?) {
+            init(url: URL?, title: String?, artist: String?, album: String?, length: Double?) {
                 self.url = url
                 self.title = title
                 self.artist = artist
                 self.album = album
+                self.length = length
             }
         }
         enum Tracks {

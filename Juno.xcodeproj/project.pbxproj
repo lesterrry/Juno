@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A81517162672039A00041269 /* Dots.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = A81517142672034300041269 /* Dots.ttf */; };
 		A81517172672039A00041269 /* Segments.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = A81517152672037500041269 /* Segments.ttf */; };
+		A815171A26738F4600041269 /* Button.wav in Resources */ = {isa = PBXBuildFile; fileRef = A815171926738F4600041269 /* Button.wav */; };
 		A83DB0E6266BAD5400C1E91D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0E5266BAD5400C1E91D /* AppDelegate.swift */; };
 		A83DB0E8266BAD5400C1E91D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0E7266BAD5400C1E91D /* ViewController.swift */; };
 		A83DB0EA266BAD5400C1E91D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A83DB0E9266BAD5400C1E91D /* Assets.xcassets */; };
@@ -35,6 +36,7 @@
 /* Begin PBXFileReference section */
 		A81517142672034300041269 /* Dots.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Dots.ttf; sourceTree = "<group>"; };
 		A81517152672037500041269 /* Segments.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Segments.ttf; sourceTree = "<group>"; };
+		A815171926738F4600041269 /* Button.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Button.wav; sourceTree = "<group>"; };
 		A83DB0E2266BAD5300C1E91D /* Juno.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Juno.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A83DB0E5266BAD5400C1E91D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A83DB0E7266BAD5400C1E91D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 		A83DB0E4266BAD5300C1E91D /* Juno */ = {
 			isa = PBXGroup;
 			children = (
+				A815171926738F4600041269 /* Button.wav */,
 				A89BB7F2266CFB3200781C3A /* Fonts */,
 				A83DB0E5266BAD5400C1E91D /* AppDelegate.swift */,
 				A83DB0E7266BAD5400C1E91D /* ViewController.swift */,
@@ -163,6 +166,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A815171A26738F4600041269 /* Button.wav in Resources */,
 				A83DB0EA266BAD5400C1E91D /* Assets.xcassets in Resources */,
 				A83DB0ED266BAD5400C1E91D /* Main.storyboard in Resources */,
 			);

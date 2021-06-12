@@ -24,6 +24,9 @@ class ViewController: NSViewController {
     @IBOutlet weak var diskLoadOneImageView: NSImageView!
     @IBOutlet weak var diskLoadTwoImageView: NSImageView!
     @IBOutlet weak var diskLoadThreeImageView: NSImageView!
+    @IBAction func nextButtonPressed(_ sender: Any) { move(true) }
+    @IBAction func previousButtonPressed(_ sender: Any) { move(false) }
+    @IBAction func playPauseButtonPressed(_ sender: Any) { playPause() }
     
     //*********************************************************************
     // CONSTS & VARS
@@ -32,13 +35,19 @@ class ViewController: NSViewController {
     let fm = FileManager.default
     let tagEditor = ID3TagEditor()
     let knownMusicExtensions = ["mp3", "aiff", "flac", "wav", "cdda", "au", "aac", "wma", "ac3", "ape"]
+    let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
     
     var diskLoadLightPosition = 0
     var mainTimer: Timer!
     var dataPath: URL? = nil
-    var systemCurrentState = JunoAxioms.State.standby
-    var systemTargetState: JunoAxioms.State? = nil
+    var systemCurrentState = JunoAxioms.SystemState.standby
+    var systemTargetState: JunoAxioms.SystemState? = nil
+    var diskAnimationCurrentState = JunoAxioms.DiskAnimationState.removed
+    var diskAnimationTargetState: JunoAxioms.DiskAnimationState? = nil
+    var diskAnimationReady = true
     var mainDisk: JunoAxioms.Disk? = nil
+    var currentPlaybackIndex = 0
+    var currentFolderIndex = 0
     
     //*********************************************************************
     // MAIN SYSTEM
@@ -49,6 +58,8 @@ class ViewController: NSViewController {
         mainLabel.font = NSFont(name: "MinecartLCD", size: 23)
         additionalLabel.font = NSFont(name: "MinecartLCD", size: 23)
         numberLabel.font = NSFont(name: "DS-Digital", size: 32)
+        
+        mainTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.mainTick), userInfo: nil, repeats: true)
         
         dataPath = fm.homeDirectoryForCurrentUser.appendingPathComponent("Juno/Disks")
         if !fm.fileExists(atPath: dataPath!.path) {
@@ -87,12 +98,22 @@ class ViewController: NSViewController {
 //                }
 //            }
 //        }
-        //Do what every player would do
+        //Setting up disk animation view
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.diskImageView.layer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            self.diskImageView.layer?.position = CGPoint(x: self.diskImageView.frame.origin.x + self.diskImageView.frame.width / 2,
+                                                         y: self.diskImageView.frame.origin.y + self.diskImageView.frame.height / 2)
+            self.diskImageView.layer?.borderWidth = 1
+            self.diskImageView.layer?.masksToBounds = true
+            self.diskImageView.layer?.cornerRadius = self.diskImageView.frame.height / 2
+        }
+        
+        //Reading the disk
         setSystemCurrentState(.busy)
         mainLabel.stringValue = "READING..."
         DispatchQueue.global(qos: .background).async {
             guard let disk = self.loadDisk() else {
-                self.systemTargetState = .error
+                self.systemTargetState = .error("NO DISK")
                 return
             }
             self.mainDisk = disk
@@ -102,6 +123,37 @@ class ViewController: NSViewController {
     //*********************************************************************
     // FUNCTIONS
     //*********************************************************************
+    func playPause() {
+        
+    }
+    func move(_ towards: Bool) {
+        if systemCurrentState == .ready {
+            var c = 0
+            var length = "??"
+            switch mainDisk!.tracks {
+            case .traditional(let t): c = t.count - 1
+            case .progressive(let p): c = p[currentFolderIndex].count - 1
+            }
+            if currentPlaybackIndex < c && towards {
+                currentPlaybackIndex += 1
+            } else if currentPlaybackIndex > 0 && !towards {
+                currentPlaybackIndex -= 1
+            } else {
+                currentPlaybackIndex = towards ? 0 : c
+            }
+            
+            numberLabel.stringValue = String(currentPlaybackIndex + 1)
+            switch mainDisk!.tracks {
+            case .traditional(let t): length = timeString(from: t[currentPlaybackIndex].length ?? 0.0) ?? "??"
+            case .progressive(let p): length = timeString(from: p[currentFolderIndex][currentPlaybackIndex].length ?? 0.0) ?? "??"
+            }
+            additionalLabel.stringValue = length
+        }
+    }
+    func previous() {
+        
+    }
+    
     @discardableResult
     func loadDisk() -> JunoAxioms.Disk? {
         if let vs = getVolume() {
@@ -112,16 +164,17 @@ class ViewController: NSViewController {
             }
             let diskLength = timeString(from: diskParameters.1)
             let fingerprint = self.getFingerprint(from: (diskParameters.0.count(), diskParameters.1))
+            var known = false
             
             if let f = fingerprint {
                 let path = "\(self.dataPath!.path)/\(f).json"
                 if self.fm.fileExists(atPath: path) {
                     if let instance: JunoAxioms.Disk.Saved = try? JSONDecoder().decode(JunoAxioms.Disk.Saved.self, from: FileHandle(forReadingAtPath: path)!.readDataToEndOfFile()), instance.reliable {
                         diskTitle = instance.title
+                        known = true
                         if instance.coverImageName != "" {
                             let imagePath = "\(self.dataPath!.path)/\(instance.coverImageName)"
                             if self.fm.fileExists(atPath: imagePath) {
-                                print(imagePath)
                                 diskImage = NSImage(contentsOfFile: imagePath)!
                             }
                         }
@@ -138,7 +191,7 @@ class ViewController: NSViewController {
             if diskImage == nil {
                 diskImage = getCoverFromID3(from: diskParameters.0)
             }
-            return JunoAxioms.Disk(title: diskTitle, length: diskLength, coverImage: diskImage, fingerprint: fingerprint, tracks: diskParameters.0)
+            return JunoAxioms.Disk(title: diskTitle, known: known, length: diskLength, coverImage: diskImage, fingerprint: fingerprint, tracks: diskParameters.0)
         } else {
             return nil
         }
@@ -168,35 +221,30 @@ class ViewController: NSViewController {
                     tracks.append(newElement: folderData.0)
                     length += folderData.1
                 } else if !(a.isHidden ?? true) && knownMusicExtensions.contains(b.pathExtension) {
-                    let track = JunoAxioms.Disk.Track(url: b.absoluteURL, title: nil, artist: nil, album: nil)
-                    tracks.append(newElement: track)
                     let asset = AVURLAsset(url: b, options: nil)
-                    length += asset.duration.seconds
+                    let c = asset.duration.seconds
+                    length += c
+                    let track = JunoAxioms.Disk.Track(url: b.absoluteURL, title: nil, artist: nil, album: nil, length: c)
+                    tracks.append(newElement: track)
                 }
             } catch {
-                mainLabel.stringValue = "DISC ERROR"
                 return nil
             }
         }
         return (tracks, length)
     }
     
-    func setSystemCurrentState(_ to: JunoAxioms.State, description: String? = nil) {
+    func setSystemCurrentState(_ to: JunoAxioms.SystemState) {
         systemCurrentState = to
         switch to {
-        case .busy, .playing:
-            mainTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.mainTick), userInfo: nil, repeats: true)
-        case .error:
-            mainTimer.invalidate()
-            if description != nil { mainLabel.stringValue = description! }
+        case .error(let e):
+            if e != nil { mainLabel.stringValue = e! }
             lightsOut()
         case .ready:
-            mainTimer.invalidate()
             diskLoadOneImageView.isHidden = false
             diskLoadTwoImageView.isHidden = false
             diskLoadThreeImageView.isHidden = false
-        default:
-            mainTimer.invalidate()
+        default: ()
         }
     }
     
@@ -222,6 +270,64 @@ class ViewController: NSViewController {
         }
         additionalLabel.stringValue = with.length ?? ""
         mainLabel.stringValue = with.title
+        knownLightImageView.isHidden = !with.known
+    }
+    
+    func diskAnimationToComply(with: JunoAxioms.DiskAnimationState) {
+        diskAnimationReady = false
+        let complete = {
+            self.diskAnimationReady = true
+            self.diskAnimationCurrentState = with
+        }
+        let driveAnimation = { (completion: @escaping () -> (), offset: Int) in
+            CATransaction.begin()
+            CATransaction.setCompletionBlock {
+                completion()
+            }
+            let animation = CABasicAnimation(keyPath: "position.y")
+            animation.byValue = -100 * offset
+            animation.duration = 1.0
+            animation.isRemovedOnCompletion = false
+            animation.fillMode = .both
+            self.diskImageView.layer?.add(animation, forKey: nil)
+            CATransaction.commit()
+        }
+        
+        switch with {
+        case .spinning:
+            let todo = {
+                CATransaction.begin()
+                CATransaction.setCompletionBlock {
+                    self.rotateAnimation.timingFunction = .none
+                    self.rotateAnimation.repeatCount = .infinity
+                    self.diskImageView.layer?.add(self.rotateAnimation, forKey: "rotation")
+                    complete()
+                }
+                self.rotateAnimation.fromValue = 0.0
+                self.rotateAnimation.byValue = Double.pi * -2.0
+                self.rotateAnimation.duration = 1
+                self.rotateAnimation.timingFunction = CAMediaTimingFunction(name: .easeIn)
+                self.rotateAnimation.isRemovedOnCompletion = true
+                self.diskImageView.layer?.add(self.rotateAnimation, forKey: "rotation")
+                CATransaction.commit()
+            }
+            if diskAnimationCurrentState == .removed {
+                driveAnimation(todo, 1)
+            } else {
+                todo()
+            }
+        case .stopped:
+            if diskAnimationCurrentState == .removed {
+                driveAnimation(complete, 1)
+            } else {
+                diskImageView.layer?.removeAnimation(forKey: "rotation")
+                complete()
+            }
+        case .removed:
+            diskImageView.layer?.removeAnimation(forKey: "rotation")
+            driveAnimation(complete, -1)
+        }
+        diskAnimationCurrentState = with
     }
     
     func getFingerprint(from: (Int?, Double?)) -> String? {
@@ -241,21 +347,6 @@ class ViewController: NSViewController {
             }
         }
         return nil
-    }
-    
-    func spinDisk() {
-        let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
-        rotateAnimation.fromValue = 0.0
-        rotateAnimation.byValue = Double.pi * -2.0
-        rotateAnimation.duration = 1
-        rotateAnimation.repeatCount = .infinity
-        diskImageView.layer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        diskImageView.layer?.position = CGPoint(x: diskImageView.frame.origin.x + diskImageView.frame.width / 2,
-                                             y: diskImageView.frame.origin.y + diskImageView.frame.height / 2)
-        diskImageView.layer?.add(rotateAnimation, forKey: nil)
-        diskImageView.layer?.borderWidth = 1
-        diskImageView.layer?.masksToBounds = true
-        diskImageView.layer?.cornerRadius = diskImageView.frame.height / 2 //This will change with corners of image and height/2 will make this circle shape
     }
     
     func fetchInfo() -> JunoAxioms.InfoResponse? {
@@ -323,17 +414,24 @@ class ViewController: NSViewController {
     
     @objc
     func mainTick() {
+        if systemTargetState != nil {
+            let a = systemTargetState
+            systemTargetState = nil
+            setSystemCurrentState(a!)
+            return
+        }
+        if diskAnimationTargetState != nil && diskAnimationReady {
+            diskAnimationToComply(with: diskAnimationTargetState!)
+            diskAnimationTargetState = nil
+        }
         switch systemCurrentState {
         case .busy:
             if mainDisk != nil {
                 self.displayToComply(with: mainDisk!)
-                self.diskImageView.image = mainDisk!.coverImage
+                if mainDisk!.coverImage != nil { self.diskImageView.image = mainDisk!.coverImage }
+                diskAnimationTargetState = .stopped
                 self.setSystemCurrentState(.ready)
                 return
-            }
-            if systemTargetState != nil {
-                setSystemCurrentState(systemTargetState!)
-                systemTargetState = nil
             }
             diskLoadLightPosition += 1
             switch diskLoadLightPosition {
