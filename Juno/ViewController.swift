@@ -37,7 +37,9 @@ class ViewController: NSViewController {
     let knownMusicExtensions = ["mp3", "aiff", "flac", "wav", "cdda", "au", "aac", "wma", "ac3", "ape"]
     let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
     
+    var player = AVAudioPlayer()
     var diskLoadLightPosition = 0
+    var displayLabelType = 0
     var mainTimer: Timer!
     var dataPath: URL? = nil
     var systemCurrentState = JunoAxioms.SystemState.standby
@@ -46,6 +48,7 @@ class ViewController: NSViewController {
     var diskAnimationTargetState: JunoAxioms.DiskAnimationState? = nil
     var diskAnimationReady = true
     var mainDisk: JunoAxioms.Disk? = nil
+    var currentTrack: JunoAxioms.Disk.Track? = nil
     var currentPlaybackIndex = 0
     var currentFolderIndex = 0
     
@@ -61,7 +64,7 @@ class ViewController: NSViewController {
         
         mainTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.mainTick), userInfo: nil, repeats: true)
         
-        dataPath = fm.homeDirectoryForCurrentUser.appendingPathComponent("Juno/Disks")
+        dataPath = fm.homeDirectoryForCurrentUser.appendingPathComponent("Music/Juno/Disks")
         if !fm.fileExists(atPath: dataPath!.path) {
             try? fm.createDirectory(atPath: dataPath!.path, withIntermediateDirectories: true, attributes: nil)
         }
@@ -123,11 +126,9 @@ class ViewController: NSViewController {
     //*********************************************************************
     // FUNCTIONS
     //*********************************************************************
-    func playPause() {
-        
-    }
     func move(_ towards: Bool) {
-        if systemCurrentState == .ready {
+        switch systemCurrentState {
+        case .playing, .ready, .paused:
             var c = 0
             var length = "??"
             switch mainDisk!.tracks {
@@ -148,10 +149,37 @@ class ViewController: NSViewController {
             case .progressive(let p): length = timeString(from: p[currentFolderIndex][currentPlaybackIndex].length ?? 0.0) ?? "??"
             }
             additionalLabel.stringValue = length
+            
+            if systemCurrentState == .playing {
+                playPause(force: true)
+            }
+        default: ()
         }
     }
-    func previous() {
-        
+    func playPause(force: Bool? = nil) {
+        if (force != nil && force!) || systemCurrentState == .ready {
+            var track: JunoAxioms.Disk.Track? = nil
+            switch mainDisk!.tracks {
+            case .progressive(let p):
+                track = p[currentFolderIndex][currentPlaybackIndex]
+            case .traditional(let t):
+                track = t[currentPlaybackIndex]
+            }
+            guard track != nil && track!.url != nil else {
+                setSystemCurrentState(.error("File error"))
+                return
+            }
+            do {
+                try player = AVAudioPlayer(contentsOf: track!.url!)
+            } catch {
+                setSystemCurrentState(.error("Player error"))
+                return
+            }
+            player.play()
+            setSystemCurrentState(.playing)
+            diskAnimationTargetState = .spinning
+            currentTrack = track
+        }
     }
     
     @discardableResult
@@ -300,6 +328,7 @@ class ViewController: NSViewController {
                 CATransaction.setCompletionBlock {
                     self.rotateAnimation.timingFunction = .none
                     self.rotateAnimation.repeatCount = .infinity
+                    self.diskImageView.layer?.removeAnimation(forKey: "rotation")
                     self.diskImageView.layer?.add(self.rotateAnimation, forKey: "rotation")
                     complete()
                 }
@@ -420,18 +449,36 @@ class ViewController: NSViewController {
             setSystemCurrentState(a!)
             return
         }
-        if diskAnimationTargetState != nil && diskAnimationReady {
+        if diskAnimationTargetState != nil && diskAnimationTargetState != diskAnimationCurrentState && diskAnimationReady {
             diskAnimationToComply(with: diskAnimationTargetState!)
             diskAnimationTargetState = nil
         }
         switch systemCurrentState {
-        case .busy:
-            if mainDisk != nil {
-                self.displayToComply(with: mainDisk!)
-                if mainDisk!.coverImage != nil { self.diskImageView.image = mainDisk!.coverImage }
-                diskAnimationTargetState = .stopped
-                self.setSystemCurrentState(.ready)
-                return
+        case let k where k == .busy || k == .playing:
+            if k == .busy {
+                if mainDisk != nil {
+                    self.displayToComply(with: mainDisk!)
+                    if mainDisk!.coverImage != nil { self.diskImageView.image = mainDisk!.coverImage }
+                    diskAnimationTargetState = .stopped
+                    self.setSystemCurrentState(.ready)
+                    return
+                }
+            } else {
+                displayLabelType += 1
+                guard currentTrack != nil else {
+                    return
+                }
+                switch displayLabelType {
+                case 3: // Title
+                    mainLabel.stringValue = currentTrack!.title ?? "Track \(currentPlaybackIndex)"
+                case 6: // Artist
+                    mainLabel.stringValue = "By \(currentTrack!.artist ?? "unknown")"
+                case 9: // Album
+                    mainLabel.stringValue = currentTrack!.album ?? "Album unknown"
+                    displayLabelType = 0
+                default: ()
+                }
+                additionalLabel.stringValue = timeString(from: player.currentTime.distance(to: currentTrack!.length!)) ?? "Playing"
             }
             diskLoadLightPosition += 1
             switch diskLoadLightPosition {
