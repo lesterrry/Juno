@@ -177,7 +177,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hex-3o-izT" userLabel="Lights">
+                            <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hex-3o-izT" userLabel="Misc">
                                 <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <subviews>
@@ -185,6 +185,41 @@
                                         <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Known" id="yCk-eR-yEP"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0mZ-os-Mmt" userLabel="MP3">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="MP3" id="Pdp-BH-gQ5"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VuW-Ly-yd9" userLabel="HiRes">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="HiRes" id="W6J-aU-aT2"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jjf-eG-UKx" userLabel="Folder">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Folder" id="4N3-AP-G88"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WLS-jL-DLe" userLabel="All">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="All" id="Xgu-kf-36V"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gBE-ZB-c2S" userLabel="One">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="One" id="8wl-lc-i86"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dwt-af-L4w" userLabel="Repeat">
+                                        <rect key="frame" x="-3" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Repeat" id="Lx5-A5-zaU"/>
+                                    </imageView>
+                                    <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TuL-5q-Bxa" userLabel="Shuffle">
+                                        <rect key="frame" x="0.0" y="0.0" width="480" height="480"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Shuffle" id="uGw-2p-xCO"/>
                                     </imageView>
                                     <imageView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jfr-bO-U7q" userLabel="FolderIco">
                                         <rect key="frame" x="0.0" y="9" width="480" height="480"/>
@@ -214,13 +249,22 @@
                                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lfC-t5-VxK" userLabel="PreviousButton">
                                         <rect key="frame" x="329" y="420" width="44" height="31"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" sound="Button" inset="2" id="pTI-mK-1A7">
+                                        <gestureRecognizers>
+                                            <clickGestureRecognizer delaysPrimaryMouseButtonEvents="YES" numberOfClicksRequired="1" id="Ce6-Nh-Kbz">
+                                                <connections>
+                                                    <action selector="previousButtonPressed:" target="XfG-lQ-9wD" id="Sjb-UA-c0i"/>
+                                                </connections>
+                                            </clickGestureRecognizer>
+                                            <pressGestureRecognizer delaysPrimaryMouseButtonEvents="YES" id="LX0-Le-kWf">
+                                                <connections>
+                                                    <action selector="previousButtonHeld:" target="XfG-lQ-9wD" id="oKa-SL-C9a"/>
+                                                </connections>
+                                            </pressGestureRecognizer>
+                                        </gestureRecognizers>
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="pTI-mK-1A7">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
-                                        <connections>
-                                            <action selector="previousButtonPressed:" target="XfG-lQ-9wD" id="a0l-7I-OIo"/>
-                                        </connections>
                                     </button>
                                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="auM-uW-zjH" userLabel="PlayPauseButton">
                                         <rect key="frame" x="376" y="420" width="44" height="31"/>
@@ -236,29 +280,77 @@
                                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gyl-bY-AgR" userLabel="NextButton">
                                         <rect key="frame" x="421" y="420" width="44" height="31"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" sound="Button" inset="2" id="cNy-te-Emo">
+                                        <gestureRecognizers>
+                                            <clickGestureRecognizer delaysPrimaryMouseButtonEvents="YES" numberOfClicksRequired="1" id="DRe-ON-5FH">
+                                                <connections>
+                                                    <action selector="nextButtonPressed:" target="XfG-lQ-9wD" id="OMh-n0-qHT"/>
+                                                </connections>
+                                            </clickGestureRecognizer>
+                                            <pressGestureRecognizer delaysPrimaryMouseButtonEvents="YES" id="Oev-N6-dt8">
+                                                <connections>
+                                                    <action selector="nextButtonHeld:" target="XfG-lQ-9wD" id="LBK-YE-kaZ"/>
+                                                </connections>
+                                            </pressGestureRecognizer>
+                                        </gestureRecognizers>
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="cNy-te-Emo">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
-                                        <connections>
-                                            <action selector="nextButtonPressed:" target="XfG-lQ-9wD" id="qpl-Yy-DA4"/>
-                                        </connections>
                                     </button>
                                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vd4-6s-ZV6" userLabel="ModeButton">
                                         <rect key="frame" x="329" y="380" width="136" height="31"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="5fQ-2L-2o6">
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" sound="Button" inset="2" id="5fQ-2L-2o6">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
+                                        <connections>
+                                            <action selector="modeButtonPressed:" target="XfG-lQ-9wD" id="mRa-5S-Gan"/>
+                                        </connections>
                                     </button>
                                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ylV-ie-sOI" userLabel="StopEjectButton">
                                         <rect key="frame" x="329" y="340" width="136" height="31"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="Th4-YV-q5Q">
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" sound="Button" inset="2" id="Th4-YV-q5Q">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
+                                        <connections>
+                                            <action selector="stopEjectButtonPressed:" target="XfG-lQ-9wD" id="pvd-mE-c2h"/>
+                                        </connections>
+                                    </button>
+                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HSI-b6-3h0" userLabel="NextFolderButton">
+                                        <rect key="frame" x="266" y="415" width="32" height="36"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" sound="Button" inset="2" id="elL-24-eOR">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="nextFolderButtonPressed:" target="XfG-lQ-9wD" id="CZx-6G-Jgb"/>
+                                        </connections>
+                                    </button>
+                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jrh-x9-DvW" userLabel="SetButton">
+                                        <rect key="frame" x="266" y="378" width="32" height="36"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" sound="Button" inset="2" id="Yzn-WS-NCT">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="setFolderButtonPressed:" target="XfG-lQ-9wD" id="Xge-lP-sxi"/>
+                                        </connections>
+                                    </button>
+                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nh8-CK-YSa" userLabel="PreviousFolderButton">
+                                        <rect key="frame" x="266" y="338" width="32" height="36"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" sound="Button" inset="2" id="yXC-fi-LKc">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="previousFolderButtonPressed:" target="XfG-lQ-9wD" id="MBk-AK-I96"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                             </customView>
@@ -266,14 +358,21 @@
                     </view>
                     <connections>
                         <outlet property="additionalLabel" destination="PFm-VT-XsN" id="i81-fp-3tg"/>
+                        <outlet property="allLightImageView" destination="WLS-jL-DLe" id="ilv-Kv-Rc9"/>
                         <outlet property="diskImageView" destination="Tf5-wi-ney" id="aPa-FA-PTD"/>
                         <outlet property="diskLoadOneImageView" destination="KJQ-nj-TCY" id="eNf-Jp-qGx"/>
                         <outlet property="diskLoadThreeImageView" destination="pGt-Tf-hzp" id="asf-UR-RN5"/>
                         <outlet property="diskLoadTwoImageView" destination="oLo-F4-ijH" id="kDa-wl-Zcn"/>
                         <outlet property="folderIcoLightImageView" destination="jfr-bO-U7q" id="Kd3-8h-Q98"/>
+                        <outlet property="folderLightImageView" destination="Jjf-eG-UKx" id="otB-dF-pnV"/>
+                        <outlet property="hiResLightImageView" destination="VuW-Ly-yd9" id="pUf-cg-lWq"/>
                         <outlet property="knownLightImageView" destination="P7H-CQ-xqr" id="ysj-DO-IYi"/>
                         <outlet property="mainLabel" destination="DuD-UQ-xwi" id="Xom-j7-W9C"/>
+                        <outlet property="mp3LightImageView" destination="0mZ-os-Mmt" id="lfk-Xh-9gQ"/>
                         <outlet property="numberLabel" destination="3bg-oI-85L" id="cJ3-gF-7jA"/>
+                        <outlet property="oneLightImageView" destination="gBE-ZB-c2S" id="6mT-KU-xdL"/>
+                        <outlet property="repeatLightImageView" destination="dwt-af-L4w" id="6UR-n1-dzJ"/>
+                        <outlet property="shuffleLightImageView" destination="TuL-5q-Bxa" id="Mcm-ub-mPZ"/>
                         <outlet property="trackIcoLightImageView" destination="LLl-Sc-0eH" id="7fM-BW-KkV"/>
                     </connections>
                 </viewController>
@@ -283,14 +382,21 @@
         </scene>
     </scenes>
     <resources>
+        <image name="All" width="1080" height="1080"/>
         <image name="Back" width="1080" height="1080"/>
         <image name="DiskLoad1" width="1080" height="1080"/>
         <image name="DiskLoad2" width="1080" height="1080"/>
         <image name="DiskLoad3" width="1080" height="1080"/>
         <image name="Dummy" width="1795" height="1795"/>
+        <image name="Folder" width="1080" height="1080"/>
         <image name="FolderIco" width="1080" height="1080"/>
+        <image name="HiRes" width="1080" height="1080"/>
         <image name="Known" width="1080" height="1080"/>
+        <image name="MP3" width="1080" height="1080"/>
         <image name="Main" width="1080" height="1080"/>
+        <image name="One" width="1080" height="1080"/>
+        <image name="Repeat" width="1080" height="1080"/>
+        <image name="Shuffle" width="1080" height="1080"/>
         <image name="TrackIco" width="1080" height="1080"/>
         <sound name="Button"/>
     </resources>
