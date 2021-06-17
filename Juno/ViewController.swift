@@ -45,7 +45,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     @IBAction func modeButtonPressed(_ sender: Any) { switchPlaybackMode() }
     @IBAction func nextFolderButtonPressed(_ sender: Any) { changeFolder(true) }
     @IBAction func previousFolderButtonPressed(_ sender: Any) { changeFolder(false) }
-    @IBAction func setFolderButtonPressed(_ sender: Any) {  }
+    @IBAction func setFolderButtonPressed(_ sender: Any) { handleSet() }
     
     //*********************************************************************
     // CONSTS & VARS
@@ -57,6 +57,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     let knownHiResExtensions = ["wav", "aiff", "dsd", "flac", "alac", "mqa"]
     let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
     
+    var setupMenu: JunoMenu!
     var playbackMode = JunoAxioms.PlaybackMode.direct
     var player = AVAudioPlayer()
     var SFXplayer = AVAudioPlayer()
@@ -122,6 +123,10 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         if !fm.fileExists(atPath: dataPath!.path) {
             try? fm.createDirectory(atPath: dataPath!.path, withIntermediateDirectories: true, attributes: nil)
         }
+        setupMenu = JunoMenu(
+            JunoMenu.Setting(title: "USE ID3", key: "use_id3", values: ["YES", "NO"], index: defaults.integer(forKey: "use_id3")),
+            JunoMenu.Setting(title: "AUTOLAUNCH", key: "autolaunch", values: ["ENABLE", "DISABLE"], index: defaults.integer(forKey: "autolaunch"))
+        )
     }
 
     override var representedObject: Any? {
@@ -166,13 +171,31 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         }
         
         // Reading the disk if needed
-        prepareDisk()
+        if defaults.integer(forKey: "autolaunch") == 1 { prepareDisk() }
     }
 
     //*********************************************************************
     // FUNCTIONS
     //*********************************************************************
+    func handleSet() {
+        guard systemCurrentState == .ready else { return }
+        if !setupMenu.invoked {
+            lightsOut()
+            displayToComply(with: setupMenu.invoke())
+        } else {
+            for i in setupMenu.settings {
+                defaults.setValue(i.index, forKey: i.key)
+            }
+            setupMenu.hide()
+            displayToComply(with: mainDisk!, includeDiskLoadLightReset: true)
+        }
+    }
+    
     func move(_ towards: Bool) {
+        if setupMenu.invoked {
+            displayToComply(with: setupMenu.moveValue(towards ? .up : .down))
+            return
+        }
         switch systemCurrentState {
         case .playing, .ready, .paused:
             var c = 0
@@ -210,6 +233,10 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     }
     
     func changeFolder(_ towards: Bool) {
+        if setupMenu.invoked {
+            displayToComply(with: setupMenu.moveSetting(towards ? .up : .down))
+            return
+        }
         switch systemCurrentState {
         case .playing, .ready, .paused:
             var c = 0
@@ -243,6 +270,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     }
     
     func stopEject() {
+        setupMenu.hide()
         switch systemCurrentState {
         case .playing, .paused:
             lightsOut()
@@ -250,67 +278,76 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             displayToComply(with: mainDisk!)
             setSystemCurrentState(.ready)
             diskAnimationTargetState = .stopped
+            currentTrack = nil
+            currentPlaybackIndex = 0
+            currentFolderIndex = 0
         case .ready:
             lightsOut(withText: true)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.shell("drutil", "tray", "eject")
-            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { self.shell("drutil tray eject") }
             setSystemCurrentState(.standby)
             diskAnimationTargetState = .removed
         case .standby:
-            shell("drutil", "tray", "eject")
+            shell("drutil tray eject")
+        case .error:
+            lightsOut(withText: true)
+            setSystemCurrentState(.standby)
         default: ()
         }
     }
     
     func playPause(force: Bool? = nil) {
+        setupMenu.hide()
         if (force != nil && force!) || systemCurrentState == .ready {
             mainLabel.stringValue = "READING"
-            var track: JunoAxioms.Disk.Track? = nil
-            switch mainDisk!.tracks {
-            case .progressive(let p):
-                track = p[currentFolderIndex][currentPlaybackIndex]
-                if track!.url!.pathExtension == "mp3" {
-                    mp3LightImageView.isHidden = false
-                    hiResLightImageView.isHidden = true
-                } else if knownHiResExtensions.contains(track!.url!.pathExtension) {
-                    hiResLightImageView.isHidden = false
-                    mp3LightImageView.isHidden = true
-                } else {
-                    hiResLightImageView.isHidden = true
-                    mp3LightImageView.isHidden = true
-                }
-                if track!.title == nil || track!.artist == nil || track!.album == nil {
-                    if defaults.integer(forKey: "use_id3") == 1, let tag = try? tagEditor.read(from: track!.url!.path) {
-                        track!.title = (tag.frames[.title] as? ID3FrameWithStringContent)?.content
-                        track!.artist = (tag.frames[.artist] as? ID3FrameWithStringContent)?.content
-                        track!.album = (tag.frames[.album] as? ID3FrameWithStringContent)?.content
+            numberLabel.stringValue = String(currentPlaybackIndex + 1)
+            DispatchQueue.global(qos: .background).async { [self] in
+                displayLabelType = 0
+                var track: JunoAxioms.Disk.Track? = nil
+                switch mainDisk!.tracks {
+                case .progressive(let p):
+                    track = p[currentFolderIndex][currentPlaybackIndex]
+                    if track!.url!.pathExtension == "mp3" {
+                        mp3LightImageView.isHidden = false
+                        hiResLightImageView.isHidden = true
+                    } else if knownHiResExtensions.contains(track!.url!.pathExtension) {
+                        hiResLightImageView.isHidden = false
+                        mp3LightImageView.isHidden = true
                     } else {
-                        track!.title = track!.url?.lastPathComponent
+                        hiResLightImageView.isHidden = true
+                        mp3LightImageView.isHidden = true
                     }
+                    if track!.title == nil || track!.artist == nil || track!.album == nil {
+                        if defaults.integer(forKey: "use_id3") == 1, let tag = try? tagEditor.read(from: track!.url!.path) {
+                            track!.title = (tag.frames[.title] as? ID3FrameWithStringContent)?.content
+                            track!.artist = (tag.frames[.artist] as? ID3FrameWithStringContent)?.content
+                            track!.album = (tag.frames[.album] as? ID3FrameWithStringContent)?.content
+                        } else {
+                            track!.title = track!.url?.lastPathComponent
+                        }
+                    }
+                case .traditional(let t):
+                    track = t[currentPlaybackIndex]
                 }
-            case .traditional(let t):
-                track = t[currentPlaybackIndex]
+                guard track != nil && track!.url != nil else {
+                    setSystemCurrentState(.error("File error"))
+                    return
+                }
+                do {
+                    try player = AVAudioPlayer(contentsOf: track!.url!)
+                } catch {
+                    setSystemCurrentState(.error("Player error"))
+                    return
+                }
+                player.prepareToPlay()
+                player.delegate = self
+                player.numberOfLoops = 0
+                player.isMeteringEnabled = true
+                player.play()
+                setSystemCurrentState(.playing)
+                diskAnimationTargetState = .spinning
+                currentTrack = track
+                playbackIndexChanged = false
             }
-            guard track != nil && track!.url != nil else {
-                setSystemCurrentState(.error("File error"))
-                return
-            }
-            do {
-                try player = AVAudioPlayer(contentsOf: track!.url!)
-            } catch {
-                setSystemCurrentState(.error("Player error"))
-                return
-            }
-            player.prepareToPlay()
-            player.delegate = self
-            player.numberOfLoops = 0
-            player.isMeteringEnabled = true
-            player.play()
-            setSystemCurrentState(.playing)
-            diskAnimationTargetState = .spinning
-            currentTrack = track
-            playbackIndexChanged = false
         } else if (force != nil && !force!) || systemCurrentState == .playing {
             player.pause()
             setSystemCurrentState(.paused)
@@ -329,6 +366,8 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     }
     
     func switchPlaybackMode(to: JunoAxioms.PlaybackMode? = nil) {
+        guard systemCurrentState == .playing || systemCurrentState == .paused || systemCurrentState == .ready else { return }
+        setupMenu.hide()
         let tos: JunoAxioms.PlaybackMode!
         if to != nil {
             tos = to
@@ -427,6 +466,9 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         DispatchQueue.global(qos: .background).async {
             guard let disk = self.loadDisk() else {
                 self.systemTargetState = .error("NO DISK")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    self.stopEject()
+                }
                 return
             }
             self.mainDisk = disk
@@ -435,11 +477,11 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     
     @discardableResult
     func loadDisk() -> JunoAxioms.Disk? {
-        if true {/*let vs = getVolume() {*/
-            //var diskTitle = vs.lastPathComponent
-            var diskTitle = "A"
+        if /*true {*/let vs = getVolume() {
+            var diskTitle = vs.lastPathComponent
+            //var diskTitle = "A"
             var diskImage: NSImage? = nil
-            guard var diskParameters = self.walkThroughPath(path: "/Users/ajdarnasibullin/Кэш/disk2"/*vs.path*/) else {
+            guard var diskParameters = self.walkThroughPath(path: /*"/Users/ajdarnasibullin/Кэш/disk2"*/vs.path) else {
                 return nil
             }
             let diskLength = timeString(from: diskParameters.1)
@@ -565,7 +607,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         }
     }
     
-    func displayToComply(with: JunoAxioms.Disk) {
+    func displayToComply(with: JunoAxioms.Disk, includeDiskLoadLightReset: Bool = false) {
         switch with.tracks {
         case .progressive(let p):
             folderIcoLightImageView.isHidden = false
@@ -579,6 +621,17 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         additionalLabel.stringValue = with.length ?? ""
         mainLabel.stringValue = with.title
         knownLightImageView.isHidden = !with.known
+        if includeDiskLoadLightReset {
+            diskLoadOneImageView.isHidden = false
+            diskLoadTwoImageView.isHidden = false
+            diskLoadThreeImageView.isHidden = false
+        }
+    }
+    
+    func displayToComply(with: JunoMenu) {
+        mainLabel.stringValue = with.titleValue
+        additionalLabel.stringValue = with.settingValue
+        numberLabel.stringValue = String(with.index + 1)
     }
     
     func diskAnimationToComply(with: JunoAxioms.DiskAnimationState) {
@@ -694,10 +747,10 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     }
     
     @discardableResult
-    func shell(_ args: String...) -> Int32 {
+    func shell(_ command: String) -> Int32 {
         let task = Process()
         task.launchPath = "/usr/bin/env"
-        task.arguments = args
+        task.arguments = ["bash", "-c", command]
         task.launch()
         task.waitUntilExit()
         return task.terminationStatus
