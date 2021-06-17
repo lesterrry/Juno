@@ -31,17 +31,18 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     @IBOutlet weak var oneLightImageView: NSImageView!
     @IBOutlet weak var repeatLightImageView: NSImageView!
     @IBOutlet weak var shuffleLightImageView: NSImageView!
+    @IBOutlet weak var levelIndicator: NSLevelIndicator!
     @IBAction func nextButtonPressed(_ sender: NSClickGestureRecognizer) { move(true); playSFX("Button") }
     @IBAction func previousButtonPressed(_ sender: NSClickGestureRecognizer) { move(false); playSFX("Button") }
     @IBAction func playPauseButtonPressed(_ sender: Any) { playPause() }
     @IBAction func nextButtonHeld(_ sender: NSPressGestureRecognizer) {
-        if sender.state == .began { ffdrew = true; playSFX("ButtonHold") } else { ffdrew = nil; playSFX("ButtonRelease") }
+        if sender.state == .began { ffdrew = true; playSFX("ButtonHold") } else if sender.state != .changed { ffdrew = nil; playSFX("ButtonRelease") }
     }
     @IBAction func previousButtonHeld(_ sender: NSPressGestureRecognizer) {
-        if sender.state == .began { ffdrew = false; playSFX("ButtonHold") } else { ffdrew = nil; playSFX("ButtonRelease") }
+        if sender.state == .began { ffdrew = false; playSFX("ButtonHold") } else if sender.state != .changed { ffdrew = nil; playSFX("ButtonRelease") }
     }
     @IBAction func stopEjectButtonPressed(_ sender: Any) { stopEject() }
-    @IBAction func modeButtonPressed(_ sender: Any) {  }
+    @IBAction func modeButtonPressed(_ sender: Any) { switchPlaybackMode() }
     @IBAction func nextFolderButtonPressed(_ sender: Any) { changeFolder(true) }
     @IBAction func previousFolderButtonPressed(_ sender: Any) { changeFolder(false) }
     @IBAction func setFolderButtonPressed(_ sender: Any) {  }
@@ -56,11 +57,13 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     let knownHiResExtensions = ["wav", "aiff", "dsd", "flac", "alac", "mqa"]
     let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
     
+    var playbackMode = JunoAxioms.PlaybackMode.direct
     var player = AVAudioPlayer()
     var SFXplayer = AVAudioPlayer()
     var diskLoadLightPosition = 0
     var displayLabelType = 0
     var mainTimer: Timer!
+    var levelIndicatorUpdateTimer: Timer!
     var dataPath: URL? = nil
     var systemCurrentState = JunoAxioms.SystemState.standby
     var systemTargetState: JunoAxioms.SystemState? = nil
@@ -69,14 +72,44 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     var diskAnimationReady = true
     var mainDisk: JunoAxioms.Disk? = nil
     var currentTrack: JunoAxioms.Disk.Track? = nil
+    var cachedTracks: JunoAxioms.Disk.Tracks? = nil
     var ffdrew: Bool? = nil
     var currentPlaybackIndex = 0
+    var playbackIndexChanged = false
+    var cachedPlaybackIndex: Int? = nil
     var currentFolderIndex = 0
     
     //*********************************************************************
     // MAIN SYSTEM
     //*********************************************************************
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) { move(true) }
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        guard let disk = mainDisk else {
+            return
+        }
+        if playbackMode != .repeatOne {
+            switch disk.tracks {
+            case .progressive(let p):
+                let c = p[currentFolderIndex].count
+                if c == currentPlaybackIndex + 1 { // If the folder ended
+                    if p.count == currentFolderIndex + 1 { // If the folder is the last one
+                        if playbackMode == .repeatAll { changeFolder(true) } else { stopEject() } // Start the disk over if needed; stop otherwise
+                    } else {
+                        if playbackMode == .repeatFolder { currentPlaybackIndex = 0; playPause(force: true) } else { changeFolder(true) } // Start the folder over if needed; continue otherwise
+                    }
+                } else {
+                    move(true)
+                }
+            case .traditional(let t):
+                if t.count == currentPlaybackIndex + 1 { // If the disk ended
+                    if playbackMode == .repeatAll { move(true) } else { stopEject() } // Start over if needed; stop otherwise
+                } else {
+                    move(true) // Next track
+                }
+            }
+        } else {
+            playPause(force: true)
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,9 +117,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         mainLabel.font = NSFont(name: "MinecartLCD", size: 23)
         additionalLabel.font = NSFont(name: "MinecartLCD", size: 23)
         numberLabel.font = NSFont(name: "DS-Digital", size: 32)
-        
         mainTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.mainTick), userInfo: nil, repeats: true)
-        
         dataPath = fm.homeDirectoryForCurrentUser.appendingPathComponent("Music/Juno/Disks")
         if !fm.fileExists(atPath: dataPath!.path) {
             try? fm.createDirectory(atPath: dataPath!.path, withIntermediateDirectories: true, attributes: nil)
@@ -100,7 +131,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     }
     
     override func viewDidAppear() {
-        //Fetching data and performing all operations in async mode
+        // Fetching data and performing all operations in async mode
 //        DispatchQueue.main.async {
 //            if let instance = self.fetchInfo() {
 //                if JunoAxioms.appVersion != nil && !JunoAxioms.appVersion!.contains("beta") && instance.version != JunoAxioms.appVersion {
@@ -124,7 +155,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
 //                }
 //            }
 //        }
-        //Setting up disk animation view
+        // Setting up disk animation view
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.diskImageView.layer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
             self.diskImageView.layer?.position = CGPoint(x: self.diskImageView.frame.origin.x + self.diskImageView.frame.width / 2,
@@ -134,7 +165,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             self.diskImageView.layer?.cornerRadius = self.diskImageView.frame.height / 2
         }
         
-        //Reading the disk id needed
+        // Reading the disk if needed
         prepareDisk()
     }
 
@@ -171,6 +202,8 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             }
             if systemCurrentState == .playing {
                 playPause(force: true)
+            } else if systemCurrentState == .paused {
+                playbackIndexChanged = true
             }
         default: ()
         }
@@ -202,6 +235,8 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             folderIcoLightImageView.isHidden = false
             if systemCurrentState == .playing {
                 playPause(force: true)
+            } else if systemCurrentState == .paused {
+                playbackIndexChanged = true
             }
         default: ()
         }
@@ -230,6 +265,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     
     func playPause(force: Bool? = nil) {
         if (force != nil && force!) || systemCurrentState == .ready {
+            mainLabel.stringValue = "READING"
             var track: JunoAxioms.Disk.Track? = nil
             switch mainDisk!.tracks {
             case .progressive(let p):
@@ -245,10 +281,12 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                     mp3LightImageView.isHidden = true
                 }
                 if track!.title == nil || track!.artist == nil || track!.album == nil {
-                    if let tag = try? tagEditor.read(from: track!.url!.path) {
+                    if defaults.integer(forKey: "use_id3") == 1, let tag = try? tagEditor.read(from: track!.url!.path) {
                         track!.title = (tag.frames[.title] as? ID3FrameWithStringContent)?.content
                         track!.artist = (tag.frames[.artist] as? ID3FrameWithStringContent)?.content
                         track!.album = (tag.frames[.album] as? ID3FrameWithStringContent)?.content
+                    } else {
+                        track!.title = track!.url?.lastPathComponent
                     }
                 }
             case .traditional(let t):
@@ -267,20 +305,119 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             player.prepareToPlay()
             player.delegate = self
             player.numberOfLoops = 0
+            player.isMeteringEnabled = true
             player.play()
             setSystemCurrentState(.playing)
             diskAnimationTargetState = .spinning
             currentTrack = track
+            playbackIndexChanged = false
         } else if (force != nil && !force!) || systemCurrentState == .playing {
             player.pause()
             setSystemCurrentState(.paused)
             diskAnimationTargetState = .stopped
         } else if systemCurrentState == .paused {
+            if playbackIndexChanged {
+                playPause(force: true)
+                return
+            }
             player.play()
             setSystemCurrentState(.playing)
             diskAnimationTargetState = .spinning
         } else if systemCurrentState == .standby {
             prepareDisk()
+        }
+    }
+    
+    func switchPlaybackMode(to: JunoAxioms.PlaybackMode? = nil) {
+        let tos: JunoAxioms.PlaybackMode!
+        if to != nil {
+            tos = to
+        } else {
+            switch playbackMode {
+            case .direct:
+                tos = .repeatAll
+            case .repeatAll:
+                if case .progressive = mainDisk!.tracks {
+                    tos = .repeatFolder
+                } else {
+                    tos = .repeatOne
+                }
+            case .repeatFolder:
+                tos = .repeatOne
+            case .repeatOne:
+                if case .progressive = mainDisk!.tracks {
+                    tos = .shuffleFolder
+                } else {
+                    tos = .shuffleAll
+                }
+            case .shuffleFolder:
+                tos = .shuffleAll
+            case .shuffleAll:
+                tos = .direct
+            }
+        }
+        playbackMode = tos
+        switch tos {
+        case .shuffleAll:
+            if cachedTracks != nil {
+                mainDisk!.tracks = cachedTracks!
+            } else {
+                cachedTracks = mainDisk!.tracks
+            }
+            mainDisk!.tracks.shuffle()
+            cachedPlaybackIndex = currentPlaybackIndex
+            currentPlaybackIndex = 0
+            shuffleLightImageView.isHidden = false
+            allLightImageView.isHidden = false
+            folderLightImageView.isHidden = true
+            oneLightImageView.isHidden = true
+            repeatLightImageView.isHidden = true
+        case .shuffleFolder:
+            cachedTracks = mainDisk!.tracks
+            mainDisk!.tracks.shuffle(folderIndex: currentFolderIndex)
+            cachedPlaybackIndex = currentPlaybackIndex
+            currentPlaybackIndex = 0
+            shuffleLightImageView.isHidden = false
+            allLightImageView.isHidden = true
+            folderLightImageView.isHidden = false
+            oneLightImageView.isHidden = true
+            repeatLightImageView.isHidden = true
+        case let k:
+            if cachedTracks != nil {
+                mainDisk!.tracks = cachedTracks!
+                cachedTracks = nil
+            }
+            if cachedPlaybackIndex != nil {
+                currentPlaybackIndex = cachedPlaybackIndex!
+                cachedPlaybackIndex = nil
+            }
+            switch k {
+            case .direct:
+                shuffleLightImageView.isHidden = true
+                allLightImageView.isHidden = true
+                folderLightImageView.isHidden = true
+                oneLightImageView.isHidden = true
+                repeatLightImageView.isHidden = true
+            case .repeatOne:
+                shuffleLightImageView.isHidden = true
+                allLightImageView.isHidden = true
+                folderLightImageView.isHidden = true
+                oneLightImageView.isHidden = false
+                repeatLightImageView.isHidden = false
+            case .repeatAll:
+                shuffleLightImageView.isHidden = true
+                allLightImageView.isHidden = false
+                folderLightImageView.isHidden = true
+                oneLightImageView.isHidden = true
+                repeatLightImageView.isHidden = false
+            case .repeatFolder:
+                shuffleLightImageView.isHidden = true
+                allLightImageView.isHidden = true
+                folderLightImageView.isHidden = false
+                oneLightImageView.isHidden = true
+                repeatLightImageView.isHidden = false
+            default: ()
+            }
         }
     }
     
@@ -298,17 +435,16 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     
     @discardableResult
     func loadDisk() -> JunoAxioms.Disk? {
-        if /*true {*/let vs = getVolume() {
-            var diskTitle = vs.lastPathComponent
-            //var diskTitle = "A"
+        if true {/*let vs = getVolume() {*/
+            //var diskTitle = vs.lastPathComponent
+            var diskTitle = "A"
             var diskImage: NSImage? = nil
-            guard var diskParameters = self.walkThroughPath(path: /*"/Users/ajdarnasibullin/Кэш/disk2"*/vs.path) else {
+            guard var diskParameters = self.walkThroughPath(path: "/Users/ajdarnasibullin/Кэш/disk2"/*vs.path*/) else {
                 return nil
             }
             let diskLength = timeString(from: diskParameters.1)
-            let fingerprint = self.getFingerprint(from: (diskParameters.0.count(), diskParameters.1))
+            let fingerprint = self.getFingerprint(from: (diskParameters.0.count, diskParameters.1))
             var known = false
-            
             if let f = fingerprint {
                 let path = "\(self.dataPath!.path)/\(f).json"
                 if self.fm.fileExists(atPath: path) {
@@ -347,7 +483,6 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         } catch {
             return nil
         }
-
         var tracks = JunoAxioms.Disk.Tracks.traditional([])
         var length: Double = 0.0
         for p in paths {
@@ -383,12 +518,30 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         case .error(let e):
             if e != nil { mainLabel.stringValue = e! }
             lightsOut()
+            switchPlaybackMode(to: .direct)
         case .ready:
             diskLoadOneImageView.isHidden = false
             diskLoadTwoImageView.isHidden = false
             diskLoadThreeImageView.isHidden = false
-        default: ()
+            switchPlaybackMode(to: .direct)
+        case let a:
+            if a == .playing {
+                levelIndicatorUpdateTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.updateLevelIndicator), userInfo: nil, repeats: true)
+            } else {
+                guard levelIndicatorUpdateTimer != nil else {
+                    return
+                }
+                levelIndicatorUpdateTimer.invalidate()
+                levelIndicator.doubleValue = 0.0
+                if a != .paused { switchPlaybackMode(to: .direct) }
+            }
         }
+    }
+    
+    @objc
+    func updateLevelIndicator() {
+        player.updateMeters()
+        levelIndicator.doubleValue = 50 - abs(Double(player.averagePower(forChannel: 0)))
     }
     
     func lightsOut(withText: Bool = false) {

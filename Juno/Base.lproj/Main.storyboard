@@ -153,7 +153,7 @@
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DuD-UQ-xwi" userLabel="Main Label">
                                 <rect key="frame" x="27" y="395" width="233" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" allowsUndo="NO" id="s8T-wB-p3h">
+                                <textFieldCell key="cell" lineBreakMode="charWrapping" allowsUndo="NO" id="s8T-wB-p3h">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -255,7 +255,7 @@
                                                     <action selector="previousButtonPressed:" target="XfG-lQ-9wD" id="Sjb-UA-c0i"/>
                                                 </connections>
                                             </clickGestureRecognizer>
-                                            <pressGestureRecognizer delaysPrimaryMouseButtonEvents="YES" id="LX0-Le-kWf">
+                                            <pressGestureRecognizer delaysPrimaryMouseButtonEvents="YES" allowableMovement="9.2233720368547758e+18" id="LX0-Le-kWf">
                                                 <connections>
                                                     <action selector="previousButtonHeld:" target="XfG-lQ-9wD" id="oKa-SL-C9a"/>
                                                 </connections>
@@ -286,7 +286,7 @@
                                                     <action selector="nextButtonPressed:" target="XfG-lQ-9wD" id="OMh-n0-qHT"/>
                                                 </connections>
                                             </clickGestureRecognizer>
-                                            <pressGestureRecognizer delaysPrimaryMouseButtonEvents="YES" id="Oev-N6-dt8">
+                                            <pressGestureRecognizer delaysPrimaryMouseButtonEvents="YES" allowableMovement="9.2233720368547758e+18" id="Oev-N6-dt8">
                                                 <connections>
                                                     <action selector="nextButtonHeld:" target="XfG-lQ-9wD" id="LBK-YE-kaZ"/>
                                                 </connections>
@@ -352,6 +352,17 @@
                                             <action selector="previousFolderButtonPressed:" target="XfG-lQ-9wD" id="MBk-AK-I96"/>
                                         </connections>
                                     </button>
+                                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2YH-tN-sc4">
+                                        <rect key="frame" x="28" y="342" width="232" height="5"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <subviews>
+                                            <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="M7x-Dh-1xQ">
+                                                <rect key="frame" x="0.0" y="-3" width="232" height="12"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                <levelIndicatorCell key="cell" alignment="left" maxValue="51" levelIndicatorStyle="relevancy" id="4td-gx-LJM"/>
+                                            </levelIndicator>
+                                        </subviews>
+                                    </customView>
                                 </subviews>
                             </customView>
                         </subviews>
@@ -367,6 +378,7 @@
                         <outlet property="folderLightImageView" destination="Jjf-eG-UKx" id="otB-dF-pnV"/>
                         <outlet property="hiResLightImageView" destination="VuW-Ly-yd9" id="pUf-cg-lWq"/>
                         <outlet property="knownLightImageView" destination="P7H-CQ-xqr" id="ysj-DO-IYi"/>
+                        <outlet property="levelIndicator" destination="M7x-Dh-1xQ" id="5LH-9L-BZp"/>
                         <outlet property="mainLabel" destination="DuD-UQ-xwi" id="Xom-j7-W9C"/>
                         <outlet property="mp3LightImageView" destination="0mZ-os-Mmt" id="lfk-Xh-9gQ"/>
                         <outlet property="numberLabel" destination="3bg-oI-85L" id="cJ3-gF-7jA"/>

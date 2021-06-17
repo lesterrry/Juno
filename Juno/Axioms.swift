@@ -11,15 +11,17 @@ import Cocoa
 class JunoAxioms {
     public static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     
+    enum PlaybackMode {
+        case direct, repeatOne, repeatFolder, repeatAll, shuffleFolder, shuffleAll
+    }
+    
     enum SystemState: Equatable {
         case standby, busy, ready, playing, paused
         case error(String?)
     }
     
     enum DiskAnimationState {
-        case removed
-        case stopped
-        case spinning
+        case removed, stopped, spinning
     }
     
     struct Disk {
@@ -28,7 +30,7 @@ class JunoAxioms {
         let length: String?
         let coverImage: NSImage?
         let fingerprint: String?
-        let tracks: Tracks
+        var tracks: Tracks
         
         struct Track: Codable {
             let url: URL?
@@ -68,7 +70,24 @@ class JunoAxioms {
                     return t
                 }
             }
-            
+            func collide(_ what: [[Track]]) -> [Track] {
+                var out: [Track] = []
+                for i in what { out.append(contentsOf: i) }
+                return out
+
+            }
+            mutating func shuffle(folderIndex: Int? = nil) {
+                switch self {
+                case .progressive(let p):
+                    if let fi = folderIndex {
+                        self = .traditional(p[fi].shuffled())
+                    } else {
+                        self = .traditional(collide(p).shuffled())
+                    }
+                case .traditional(let t):
+                    self = .traditional(t.shuffled())
+                }
+            }
             static func complement(what: [Track], with: [Track]) -> [Track] {
                 var complemented: [Track] = what
                 for i in what.indices {
@@ -78,7 +97,7 @@ class JunoAxioms {
                 }
                 return complemented
             }
-            func count() -> Int {
+            var count: Int {
                 switch self {
                 case .traditional(let t):
                     return t.count
