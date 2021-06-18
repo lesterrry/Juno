@@ -355,6 +355,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     func stopEject() {
         player = AVAudioPlayer()
         setupMenu.hide()
+        levelIndicator.doubleValue = 0
         switch systemCurrentState {
         case .playing, .paused:
             lightsOut()
@@ -381,6 +382,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     func playPause(force: Bool? = nil) {
         setupMenu.hide()
         if (force != nil && force!) || systemCurrentState == .ready {
+            setSystemCurrentState(.playing)
             mainLabel.stringValue = "READING"
             numberLabel.stringValue = String(currentPlaybackIndex + 1)
             DispatchQueue.global(qos: .background).async { [self] in
@@ -402,7 +404,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                     track = t[currentPlaybackIndex]
                 }
                 guard track != nil && track!.url != nil else {
-                    setSystemCurrentState(.error("File error"))
+                    setSystemCurrentState(.error("File error")) // UI from secondary thread omg noooooooo
                     return
                 }
                 do {
@@ -416,7 +418,6 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                 player.numberOfLoops = 0
                 player.isMeteringEnabled = true
                 player.play()
-                setSystemCurrentState(.playing)
                 diskAnimationTargetState = .spinning
                 currentTrack = track
                 playbackIndexChanged = false
@@ -654,11 +655,6 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                 levelIndicatorUpdateTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.updateLevelIndicator), userInfo: nil, repeats: true)
                 controlCenterInfo.playbackState = .playing
             } else {
-                guard levelIndicatorUpdateTimer != nil else {
-                    return
-                }
-                levelIndicatorUpdateTimer.invalidate()
-                levelIndicator.doubleValue = 0.0
                 if a != .paused {
                     switchPlaybackMode(to: .direct)
                     controlCenterInfo.playbackState = .stopped
@@ -669,6 +665,11 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                 } else {
                     controlCenterInfo.playbackState = .paused
                 }
+                guard levelIndicatorUpdateTimer != nil else {
+                    return
+                }
+                levelIndicatorUpdateTimer.invalidate()
+                levelIndicator.doubleValue = 0.0
             }
         }
     }
