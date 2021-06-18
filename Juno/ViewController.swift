@@ -8,6 +8,16 @@
 import Cocoa
 import AVFoundation
 import ID3TagEditor
+import MediaPlayer
+
+class MainView: NSView {
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        return true
+    }
+    override var acceptsFirstResponder : Bool {
+        return true
+    }
+}
 
 class ViewController: NSViewController, AVAudioPlayerDelegate {
     
@@ -51,6 +61,8 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     // CONSTS & VARS
     //*********************************************************************
     let defaults = UserDefaults.standard
+    let controlCenter = MPRemoteCommandCenter.shared()
+    let controlCenterInfo = MPNowPlayingInfoCenter.default()
     let fm = FileManager.default
     let tagEditor = ID3TagEditor()
     let knownBasicExtensions = ["mp3", "aac", "wma", "ogg"]
@@ -124,42 +136,87 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             try? fm.createDirectory(atPath: dataPath!.path, withIntermediateDirectories: true, attributes: nil)
         }
         setupMenu = JunoMenu(
-            JunoMenu.Setting(title: "USE ID3", key: "use_id3", values: ["YES", "NO"], index: defaults.integer(forKey: "use_id3")),
-            JunoMenu.Setting(title: "AUTOLAUNCH", key: "autolaunch", values: ["ENABLE", "DISABLE"], index: defaults.integer(forKey: "autolaunch"))
+            JunoMenu.Setting(title: "USE ID3", key: "use_id3", values: ["NO", "YES"], index: defaults.integer(forKey: "use_id3")),
+            JunoMenu.Setting(title: "AUTOLAUNCH", key: "autolaunch", values: ["DISABLE", "ENABLE"], index: defaults.integer(forKey: "autolaunch"))
         )
-    }
-
-    override var representedObject: Any? {
-        didSet {
-
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) {
+            self.myKeyDown(with: $0)
+            return nil
+        }
+        controlCenter.togglePlayPauseCommand.addTarget{_ in
+            if self.systemCurrentState == .ready || self.systemCurrentState == .paused || self.systemCurrentState == .playing {
+                self.playPause()
+                return .success
+            }
+            return .commandFailed
+        }
+        controlCenter.playCommand.addTarget {_ in
+            if self.systemCurrentState == .ready || self.systemCurrentState == .paused {
+                self.playPause()
+                return .success
+            }
+            return .commandFailed
+        }
+        controlCenter.pauseCommand.addTarget {_ in
+            if self.systemCurrentState == .playing {
+                self.playPause()
+                return .success
+            }
+            return .commandFailed
+        }
+        controlCenter.nextTrackCommand.addTarget {_ in
+            if self.systemCurrentState == .playing {
+                self.move(true)
+                return .success
+            }
+            return .commandFailed
+        }
+        controlCenter.previousTrackCommand.addTarget {_ in
+            if self.systemCurrentState == .playing {
+                self.move(false)
+                return .success
+            }
+            return .commandFailed
+        }
+        controlCenter.seekForwardCommand.addTarget {_ in
+            return .commandFailed
+        }
+        controlCenter.seekBackwardCommand.addTarget {_ in
+            return .commandFailed
+        }
+        controlCenter.changePlaybackPositionCommand.addTarget {_ in
+            if self.controlCenterInfo.nowPlayingInfo != nil {
+                self.controlCenterInfo.nowPlayingInfo!["MPNowPlayingInfoPropertyElapsedPlaybackTime"] = self.player.currentTime
+            }
+            return .commandFailed
         }
     }
     
     override func viewDidAppear() {
         // Fetching data and performing all operations in async mode
-//        DispatchQueue.main.async {
-//            if let instance = self.fetchInfo() {
-//                if JunoAxioms.appVersion != nil && !JunoAxioms.appVersion!.contains("beta") && instance.version != JunoAxioms.appVersion {
-//                    if self.displayAlert(
-//                        title: "New version is out",
-//                        message: "Your current version is \(JunoAxioms.appVersion!), however, \(instance.version) is the latest one.",
-//                        buttons: "Update", "Skip"
-//                    ) == 1000 {
-//                        NSWorkspace.shared.open(URL(string: "https://github.com/Lesterrry/Juno/releases/latest")!)
-//                    }
-//                }
-//                if let m = instance.message, self.defaults.string(forKey: "last_message") != m {
-//                    self.displayAlert(title: "Message from the developer", message: m, buttons: "OK")
-//                    self.defaults.setValue(m, forKey: "last_message")
-//                } else {
-//                    self.defaults.setValue("nil", forKey: "last_message")
-//                }
-//                if let sm = instance.shortMessage {
-//                    let appDelegate = NSApplication.shared.delegate as! AppDelegate
-//                    appDelegate.initShortMessageMenuItem(title: sm, link: instance.shortMessageLink)
-//                }
-//            }
-//        }
+        DispatchQueue.main.async {
+            if let instance = self.fetchInfo() {
+                if JunoAxioms.appVersion != nil && !JunoAxioms.appVersion!.contains("beta") && instance.version != JunoAxioms.appVersion {
+                    if self.displayAlert(
+                        title: "New version is out",
+                        message: "Your current version is \(JunoAxioms.appVersion!), however, \(instance.version) is the latest one.",
+                        buttons: "Update", "Skip"
+                    ) == 1000 {
+                        NSWorkspace.shared.open(URL(string: "https://github.com/Lesterrry/Juno/releases/latest")!)
+                    }
+                }
+                if let m = instance.message, self.defaults.string(forKey: "last_message") != m {
+                    self.displayAlert(title: "Message from the developer", message: m, buttons: "OK")
+                    self.defaults.setValue(m, forKey: "last_message")
+                } else {
+                    self.defaults.setValue("nil", forKey: "last_message")
+                }
+                if let sm = instance.shortMessage {
+                    let appDelegate = NSApplication.shared.delegate as! AppDelegate
+                    appDelegate.initShortMessageMenuItem(title: sm, link: instance.shortMessageLink)
+                }
+            }
+        }
         // Setting up disk animation view
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.diskImageView.layer?.anchorPoint = CGPoint(x: 0.5, y: 0.5)
@@ -177,6 +234,31 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     //*********************************************************************
     // FUNCTIONS
     //*********************************************************************
+    func myKeyDown(with event: NSEvent) {
+        super.keyDown(with: event)
+        switch event.keyCode {
+        case 12:
+            exit(0)
+        case 0:
+            switchPlaybackMode()
+        case 1:
+            stopEject()
+        case 36:
+            handleSet()
+        case 49:
+            playPause()
+        case 123:
+            move(false)
+        case 124:
+            move(true)
+        case 125:
+            changeFolder(false)
+        case 126:
+            changeFolder(true)
+        default: ()
+        }
+    }
+    
     func handleSet() {
         guard systemCurrentState == .ready else { return }
         if !setupMenu.invoked {
@@ -185,6 +267,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         } else {
             for i in setupMenu.settings {
                 defaults.setValue(i.index, forKey: i.key)
+                print("\(i.key) = \(i.index)")
             }
             setupMenu.hide()
             displayToComply(with: mainDisk!, includeDiskLoadLightReset: true)
@@ -270,11 +353,11 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     }
     
     func stopEject() {
+        player = AVAudioPlayer()
         setupMenu.hide()
         switch systemCurrentState {
         case .playing, .paused:
             lightsOut()
-            player.stop()
             displayToComply(with: mainDisk!)
             setSystemCurrentState(.ready)
             diskAnimationTargetState = .stopped
@@ -283,7 +366,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             currentFolderIndex = 0
         case .ready:
             lightsOut(withText: true)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { self.shell("drutil tray eject") }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { self.shell("drutil eject") }
             setSystemCurrentState(.standby)
             diskAnimationTargetState = .removed
         case .standby:
@@ -306,16 +389,6 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                 switch mainDisk!.tracks {
                 case .progressive(let p):
                     track = p[currentFolderIndex][currentPlaybackIndex]
-                    if track!.url!.pathExtension == "mp3" {
-                        mp3LightImageView.isHidden = false
-                        hiResLightImageView.isHidden = true
-                    } else if knownHiResExtensions.contains(track!.url!.pathExtension) {
-                        hiResLightImageView.isHidden = false
-                        mp3LightImageView.isHidden = true
-                    } else {
-                        hiResLightImageView.isHidden = true
-                        mp3LightImageView.isHidden = true
-                    }
                     if track!.title == nil || track!.artist == nil || track!.album == nil {
                         if defaults.integer(forKey: "use_id3") == 1, let tag = try? tagEditor.read(from: track!.url!.path) {
                             track!.title = (tag.frames[.title] as? ID3FrameWithStringContent)?.content
@@ -347,6 +420,14 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                 diskAnimationTargetState = .spinning
                 currentTrack = track
                 playbackIndexChanged = false
+                controlCenterInfo.nowPlayingInfo = [
+                    "albumTitle": track!.album ?? "Unknown",
+                    "artist": track!.artist ?? "Unknown",
+                    "title": track!.title ?? "Track \(currentPlaybackIndex + 1)",
+                    "playbackDuration": TimeInterval(exactly: track!.length ?? 0.0) ?? "0.0",
+                    "bookmarkTime": TimeInterval(exactly: 0.0)!,
+                    MPNowPlayingInfoPropertyIsLiveStream: 0.0,
+                ]
             }
         } else if (force != nil && !force!) || systemCurrentState == .playing {
             player.pause()
@@ -477,11 +558,10 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     
     @discardableResult
     func loadDisk() -> JunoAxioms.Disk? {
-        if /*true {*/let vs = getVolume() {
+        if let vs = getVolume() {
             var diskTitle = vs.lastPathComponent
-            //var diskTitle = "A"
             var diskImage: NSImage? = nil
-            guard var diskParameters = self.walkThroughPath(path: /*"/Users/ajdarnasibullin/Кэш/disk2"*/vs.path) else {
+            guard var diskParameters = self.walkThroughPath(path: vs.path) else {
                 return nil
             }
             let diskLength = timeString(from: diskParameters.1)
@@ -561,21 +641,34 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             if e != nil { mainLabel.stringValue = e! }
             lightsOut()
             switchPlaybackMode(to: .direct)
+            controlCenterInfo.playbackState = .stopped
+            mainDisk = nil
         case .ready:
             diskLoadOneImageView.isHidden = false
             diskLoadTwoImageView.isHidden = false
             diskLoadThreeImageView.isHidden = false
             switchPlaybackMode(to: .direct)
+            controlCenterInfo.playbackState = .stopped
         case let a:
             if a == .playing {
                 levelIndicatorUpdateTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.updateLevelIndicator), userInfo: nil, repeats: true)
+                controlCenterInfo.playbackState = .playing
             } else {
                 guard levelIndicatorUpdateTimer != nil else {
                     return
                 }
                 levelIndicatorUpdateTimer.invalidate()
                 levelIndicator.doubleValue = 0.0
-                if a != .paused { switchPlaybackMode(to: .direct) }
+                if a != .paused {
+                    switchPlaybackMode(to: .direct)
+                    controlCenterInfo.playbackState = .stopped
+                    controlCenterInfo.nowPlayingInfo = .none
+                    if a == .standby {
+                        mainDisk = nil
+                    }
+                } else {
+                    controlCenterInfo.playbackState = .paused
+                }
             }
         }
     }
@@ -746,14 +839,14 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
         return nil
     }
     
-    @discardableResult
-    func shell(_ command: String) -> Int32 {
-        let task = Process()
-        task.launchPath = "/usr/bin/env"
-        task.arguments = ["bash", "-c", command]
-        task.launch()
-        task.waitUntilExit()
-        return task.terminationStatus
+    func shell(_ command: String) {
+        DispatchQueue.main.async {
+            let task = Process()
+            task.launchPath = "/usr/bin/env"
+            task.arguments = ["bash", "-c", command]
+            task.launch()
+            task.waitUntilExit()
+        }
     }
     
     @discardableResult
@@ -803,6 +896,16 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                 displayLabelType += 1
                 guard currentTrack != nil else {
                     return
+                }
+                if currentTrack!.url!.pathExtension == "mp3" { // I don't really like this but who cares
+                    mp3LightImageView.isHidden = false
+                    hiResLightImageView.isHidden = true
+                } else if knownHiResExtensions.contains(currentTrack!.url!.pathExtension) {
+                    hiResLightImageView.isHidden = false
+                    mp3LightImageView.isHidden = true
+                } else {
+                    hiResLightImageView.isHidden = true
+                    mp3LightImageView.isHidden = true
                 }
                 switch displayLabelType {
                 case 3: // Title
