@@ -41,7 +41,7 @@
 		A81517152672037500041269 /* Segments.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Segments.ttf; sourceTree = "<group>"; };
 		A815171926738F4600041269 /* Button.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Button.wav; sourceTree = "<group>"; };
 		A83179BB267CC303004821CE /* Juno Player.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "Juno Player.gif"; sourceTree = "<group>"; };
-		A83179BE267CC329004821CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = Juno/README.md; sourceTree = "<group>"; };
+		A83179C0267CC384004821CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		A83DB0E2266BAD5300C1E91D /* Juno.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Juno.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A83DB0E5266BAD5400C1E91D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A83DB0E7266BAD5400C1E91D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -79,7 +79,7 @@
 		A83DB0D9266BAD5300C1E91D = {
 			isa = PBXGroup;
 			children = (
-				A83179BE267CC329004821CE /* README.md */,
+				A83179C0267CC384004821CE /* README.md */,
 				A83DB0E4266BAD5300C1E91D /* Juno */,
 				A83DB0E3266BAD5300C1E91D /* Products */,
 			);
