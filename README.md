@@ -1,5 +1,6 @@
 #  Juno
 A CD player for MacOS
+
 ![Juno Player](https://github.com/Lesterrry/Juno/blob/main/Juno/Pictures/Juno%20Player.gif?raw=true)
 
 ## What is it?
@@ -57,3 +58,6 @@ Juno is a player for all sorts of disks. It opens all files your PC is capable o
    "cover_image_name": "NAME OF IMAGE WITH AN EXTENSION"
  }
  ```
+ 
+## Other
+You can go to MacOS Settings, *CD/DVD*, and set *Open Application*, Juno as an action when a music CD is inserted. If *AUTOLAUNCH* setting is set to *YES* in Juno, CDs will be read automatically.
