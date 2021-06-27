@@ -1,6 +1,8 @@
 #  Juno
 A CD player for MacOS
 
+See also: [Radio Automne](https://github.com/lesterrry/radio-automne) – an Internet radio
+
 ![Juno Player](https://github.com/Lesterrry/Juno/blob/main/Juno/Pictures/Juno%20Player.gif?raw=true)
 
 ## What is it?
