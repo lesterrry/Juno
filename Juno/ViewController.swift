@@ -811,7 +811,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             semaphore.signal()
         })
         task.resume()
-        semaphore.wait()
+        let _ = semaphore.wait(timeout: DispatchTime.now() + 3.0)
         return instance
     }
     
