@@ -355,7 +355,6 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     func stopEject() {
         player = AVAudioPlayer()
         setupMenu.hide()
-        levelIndicator.doubleValue = 0
         switch systemCurrentState {
         case .playing, .paused:
             lightsOut()
@@ -650,6 +649,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
             diskLoadThreeImageView.isHidden = false
             switchPlaybackMode(to: .direct)
             controlCenterInfo.playbackState = .stopped
+            clearLabelIndicator()
         case let a:
             if a == .playing {
                 levelIndicatorUpdateTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.updateLevelIndicator), userInfo: nil, repeats: true)
@@ -665,11 +665,7 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
                 } else {
                     controlCenterInfo.playbackState = .paused
                 }
-                guard levelIndicatorUpdateTimer != nil else {
-                    return
-                }
-                levelIndicatorUpdateTimer.invalidate()
-                levelIndicator.doubleValue = 0.0
+                clearLabelIndicator()
             }
         }
     }
@@ -678,6 +674,12 @@ class ViewController: NSViewController, AVAudioPlayerDelegate {
     func updateLevelIndicator() {
         player.updateMeters()
         levelIndicator.doubleValue = 50 - abs(Double(player.averagePower(forChannel: 0)))
+    }
+    
+    func clearLabelIndicator() {
+        guard levelIndicatorUpdateTimer != nil else { return }
+        levelIndicatorUpdateTimer.invalidate()
+        levelIndicator.doubleValue = 0.0
     }
     
     func lightsOut(withText: Bool = false) {

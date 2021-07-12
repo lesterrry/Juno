@@ -14,12 +14,12 @@
 		A83DB0E8266BAD5400C1E91D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0E7266BAD5400C1E91D /* ViewController.swift */; };
 		A83DB0EA266BAD5400C1E91D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A83DB0E9266BAD5400C1E91D /* Assets.xcassets */; };
 		A83DB0ED266BAD5400C1E91D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A83DB0EB266BAD5400C1E91D /* Main.storyboard */; };
-		A83DB0FC266BBB4200C1E91D /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0FB266BBB4200C1E91D /* Keys.swift */; };
 		A83DB0FF266BC3D400C1E91D /* Axioms.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83DB0FE266BC3D400C1E91D /* Axioms.swift */; };
 		A89BB7FC266FEF9800781C3A /* ID3TagEditor in Frameworks */ = {isa = PBXBuildFile; productRef = A89BB7FB266FEF9800781C3A /* ID3TagEditor */; };
 		A89DBC12267A709600915EC5 /* ButtonRelease.wav in Resources */ = {isa = PBXBuildFile; fileRef = A89DBC11267A709600915EC5 /* ButtonRelease.wav */; };
 		A89DBC15267A709D00915EC5 /* ButtonHold.wav in Resources */ = {isa = PBXBuildFile; fileRef = A89DBC14267A709C00915EC5 /* ButtonHold.wav */; };
 		A89DBC18267BABF600915EC5 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89DBC17267BABF600915EC5 /* Menu.swift */; };
+		A8D05E6E269C5EC90065D69E /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D05E6D269C5EC60065D69E /* Keys.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,11 +49,11 @@
 		A83DB0EC266BAD5400C1E91D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A83DB0EE266BAD5400C1E91D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A83DB0EF266BAD5400C1E91D /* Juno.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Juno.entitlements; sourceTree = "<group>"; };
-		A83DB0FB266BBB4200C1E91D /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
 		A83DB0FE266BC3D400C1E91D /* Axioms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Axioms.swift; sourceTree = "<group>"; };
 		A89DBC11267A709600915EC5 /* ButtonRelease.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ButtonRelease.wav; sourceTree = "<group>"; };
 		A89DBC14267A709C00915EC5 /* ButtonHold.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ButtonHold.wav; sourceTree = "<group>"; };
 		A89DBC17267BABF600915EC5 /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
+		A8D05E6D269C5EC60065D69E /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,11 +100,11 @@
 				A815171926738F4600041269 /* Button.wav */,
 				A89DBC14267A709C00915EC5 /* ButtonHold.wav */,
 				A89DBC11267A709600915EC5 /* ButtonRelease.wav */,
+				A8D05E6D269C5EC60065D69E /* Keys.swift */,
 				A89BB7F2266CFB3200781C3A /* Fonts */,
 				A83DB0E5266BAD5400C1E91D /* AppDelegate.swift */,
 				A83DB0E7266BAD5400C1E91D /* ViewController.swift */,
 				A89DBC17267BABF600915EC5 /* Menu.swift */,
-				A83DB0FB266BBB4200C1E91D /* Keys.swift */,
 				A83DB0FE266BC3D400C1E91D /* Axioms.swift */,
 				A83DB0E9266BAD5400C1E91D /* Assets.xcassets */,
 				A83DB0EB266BAD5400C1E91D /* Main.storyboard */,
@@ -204,9 +204,9 @@
 			files = (
 				A83DB0FF266BC3D400C1E91D /* Axioms.swift in Sources */,
 				A83DB0E8266BAD5400C1E91D /* ViewController.swift in Sources */,
-				A83DB0FC266BBB4200C1E91D /* Keys.swift in Sources */,
 				A83DB0E6266BAD5400C1E91D /* AppDelegate.swift in Sources */,
 				A89DBC18267BABF600915EC5 /* Menu.swift in Sources */,
+				A8D05E6E269C5EC90065D69E /* Keys.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,7 +345,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Juno/Juno.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9Q6UB3UBW7;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -354,9 +355,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Fetch.Juno;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -367,7 +369,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Juno/Juno.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9Q6UB3UBW7;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -376,9 +379,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Fetch.Juno;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
